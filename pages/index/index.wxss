@@ -396,25 +396,60 @@ page {
   font-size: 36rpx;
   font-weight: bold;
   color: #ff6f00;
-  margin-bottom: 20rpx;
-}
-
-.card-notification-name {
-  font-size: 32rpx;
-  color: #333;
-  margin-bottom: 12rpx;
-}
-
-.card-notification-quality {
-  font-size: 26rpx;
-  color: #757575;
-  margin-bottom: 20rpx;
+  margin-bottom: 30rpx;
 }
 
 .card-notification-hint {
   font-size: 22rpx;
   color: #bdbdbd;
+  margin-top: 24rpx;
 }
+
+/* 卡牌预览 UI（获取弹窗中） */
+.game-card-preview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50rpx 40rpx 30rpx;
+  border-radius: 20rpx;
+  border: 4rpx solid #ccc;
+  min-width: 280rpx;
+  min-height: 200rpx;
+}
+
+.game-card-preview-set {
+  position: absolute;
+  top: -2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4rpx 20rpx;
+  border: 3rpx solid #ccc;
+  border-top: none;
+  border-radius: 0 0 12rpx 12rpx;
+  font-size: 20rpx;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.game-card-preview-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 12rpx;
+}
+
+.game-card-preview-stars {
+  font-size: 28rpx;
+  letter-spacing: 4rpx;
+}
+
+.game-card-preview-stars.stars-1 { color: #9e9e9e; }
+.game-card-preview-stars.stars-2 { color: #42a5f5; }
+.game-card-preview-stars.stars-3 { color: #ab47bc; }
+.game-card-preview-stars.stars-5 { color: #ffa000; }
 
 /* 加载中 */
 .loading-container {

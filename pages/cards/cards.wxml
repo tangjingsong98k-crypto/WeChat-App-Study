@@ -29,11 +29,17 @@
         <text>暂无卡牌，浇水时有机会获得哦~</text>
       </view>
       <view class="card-grid" wx:else>
-        <view class="card-item quality-{{item.card_quality}}" wx:for="{{cards}}" wx:key="card_id">
-          <view class="card-icon">{{item.card_icon}}</view>
-          <view class="card-name">{{item.card_name}}</view>
-          <view class="card-quality-tag">{{item.card_quality === 'common' ? '普通' : item.card_quality === 'rare' ? '稀有' : item.card_quality === 'epic' ? '史诗' : '传说'}}</view>
-          <view class="card-count">×{{item.owned_count}}</view>
+        <view class="game-card set-{{item.card_set_id}}" wx:for="{{cards}}" wx:key="card_id" style="background: {{item.setBg}}; border-color: {{item.setHue}};">
+          <!-- 卡组名称：顶部居中小字，带衬线遮挡效果 -->
+          <view class="game-card-set-label" style="background: {{item.setBg}}; border-color: {{item.setHue}};">
+            <text style="color: {{item.setHue}};">{{item.setName}}</text>
+          </view>
+          <!-- 卡牌名称：居中 -->
+          <view class="game-card-name">{{item.card_name}}</view>
+          <!-- 稀有度星星：居中在名称下方 -->
+          <view class="game-card-stars stars-{{item.starsCount}}">{{item.stars}}</view>
+          <!-- 拥有数量 -->
+          <view class="game-card-count">×{{item.owned_count}}</view>
         </view>
       </view>
     </view>

@@ -6,6 +6,15 @@ const MAX_WATERING_TIME = 50
 const WATERING_GROW_SCORE = 10
 const UPGRADE_NEED_GROW_SCORE = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500]
 
+// 卡组颜色配置（与 cards 页面一致）
+const SET_COLORS = {
+  1: { name: '四季之歌', hue: '#4caf50', bg: '#e8f5e9' },
+  2: { name: '森林守护者', hue: '#2196f3', bg: '#e3f2fd' },
+  3: { name: '彩虹花园', hue: '#9c27b0', bg: '#f3e5f5' },
+  '-1': { name: '散卡', hue: '#607d8b', bg: '#eceff1' }
+}
+const QUALITY_STARS = { common: 1, rare: 2, epic: 3, legendary: 5 }
+
 Page({
   data: {
     species: '',
@@ -276,7 +285,15 @@ Page({
       this.showWaterFloat(WATERING_GROW_SCORE)
 
       if (res.card) {
-        this.setData({ cardGained: res.card })
+        const card = res.card
+        const setConfig = SET_COLORS[card.card_set_id] || SET_COLORS['-1']
+        const starsCount = QUALITY_STARS[card.card_quality] || 1
+        card._setName = setConfig.name
+        card._setHue = setConfig.hue
+        card._setBg = setConfig.bg
+        card._stars = '★'.repeat(starsCount)
+        card._starsCount = starsCount
+        this.setData({ cardGained: card })
         setTimeout(() => { this.setData({ cardGained: null }) }, 3000)
       }
 

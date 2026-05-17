@@ -5,6 +5,7 @@ const { createUserModel } = require('../models/userModel');
 const { TREE_SPECIES, UPGRADE_NEED_GROW_SCORE, WATERING_GROW_SCORE, USER_FERTILIZE_RECOVER_EFFECT } = require('../config');
 const { getDb } = require('../db/init');
 const defaultWateringTimerService = require('./wateringTimerService');
+const defaultCardService = require('./cardService');
 
 /**
  * Tree Service - handles tree selection, watering, level calculation, and tree status.
@@ -14,14 +15,14 @@ const defaultWateringTimerService = require('./wateringTimerService');
  * @param {object} [options.treeModel] - Custom tree model instance (for testing)
  * @param {object} [options.userModel] - Custom user model instance (for testing)
  * @param {object} [options.wateringTimerService] - Watering timer service instance
- * @param {object|null} [options.cardService] - Card service instance (optional, can be null)
+ * @param {object|null} [options.cardService] - Card service instance (null to disable)
  */
 function createTreeService(options = {}) {
   const getDatabase = options.getDatabase || getDb;
   const model = options.treeModel || (options.getDatabase ? createTreeModel({ getDatabase: options.getDatabase }) : treeModel);
   const userMdl = options.userModel || (options.getDatabase ? createUserModel({ getDatabase: options.getDatabase }) : userModelModule);
   const wateringTimer = options.wateringTimerService || defaultWateringTimerService;
-  const cardService = options.cardService || null;
+  const cardService = options.cardService !== undefined ? options.cardService : defaultCardService;
 
   return {
     /**

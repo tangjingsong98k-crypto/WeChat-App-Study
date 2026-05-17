@@ -276,9 +276,11 @@ describe('treeService', () => {
     });
 
     it('should work without cardService (null)', () => {
-      treeService.selectSpecies(testUser.id, 'apple');
+      const getDatabase = () => db;
+      const noCardService = createTreeService({ getDatabase, wateringTimerService, cardService: null });
+      noCardService.selectSpecies(testUser.id, 'apple');
 
-      const result = treeService.water(testUser.id);
+      const result = noCardService.water(testUser.id);
 
       expect(result.card).toBeUndefined();
       expect(result.growScore).toBe(10);

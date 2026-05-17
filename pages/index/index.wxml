@@ -107,8 +107,14 @@
   <view class="card-notification" wx:if="{{cardGained}}" bindtap="onDismissCard">
     <view class="card-notification-content">
       <text class="card-notification-title">🎉 获得卡牌！</text>
-      <text class="card-notification-name">{{cardGained.card_name}}</text>
-      <text class="card-notification-quality">品质：{{cardGained.card_quality}}</text>
+      <!-- 卡牌 UI -->
+      <view class="game-card-preview" style="background: {{cardGained._setBg}}; border-color: {{cardGained._setHue}};">
+        <view class="game-card-preview-set" style="background: {{cardGained._setBg}}; border-color: {{cardGained._setHue}};">
+          <text style="color: {{cardGained._setHue}};">{{cardGained._setName}}</text>
+        </view>
+        <view class="game-card-preview-name">{{cardGained.card_name}}</view>
+        <view class="game-card-preview-stars stars-{{cardGained._starsCount}}">{{cardGained._stars}}</view>
+      </view>
       <text class="card-notification-hint">点击关闭</text>
     </view>
   </view>
