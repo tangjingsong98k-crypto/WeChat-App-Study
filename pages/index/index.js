@@ -61,6 +61,12 @@ Page({
     app.getLoginPromise().then(() => {
       this.loadData()
     })
+
+    // 如果有未读新卡牌，保持 tab 红点
+    const newCards = wx.getStorageSync('newCardIds') || []
+    if (newCards.length > 0) {
+      wx.showTabBarRedDot({ index: 1 })
+    }
   },
 
   onHide() {
@@ -222,10 +228,19 @@ Page({
   },
 
   calcGrowPercent(growScore, level) {
-    const maxLevel = UPGRADE_NEED_GROW_SCORE.length - 1
-    if (level >= maxLevel) return 100
-    const currentThreshold = UPGRADE_NEED_GROW_SCORE[level]
-    const nextThreshold = UPGRADE_NEED_GROW_SCORE[level + 1]
+    const maxIdx = UPGRADE_NEED_GROW_SCORE.length - 1
+    const lastInterval = UPGRADE_NEED_GROW_SCORE[maxIdx] - UPGRADE_NEED_GROW_SCORE[maxIdx - 1]
+
+    let currentThreshold, nextThreshold
+    if (level < maxIdx) {
+      currentThreshold = UPGRADE_NEED_GROW_SCORE[level]
+      nextThreshold = UPGRADE_NEED_GROW_SCORE[level + 1]
+    } else {
+      // 超过数组范围：每级固定增量
+      currentThreshold = UPGRADE_NEED_GROW_SCORE[maxIdx] + (level - maxIdx) * lastInterval
+      nextThreshold = currentThreshold + lastInterval
+    }
+
     const range = nextThreshold - currentThreshold
     if (range <= 0) return 100
     const progress = growScore - currentThreshold
@@ -360,6 +375,11 @@ Page({
 
       if (res.card) {
         const card = res.card
+        // 只有首次获得的卡牌才标记为新卡牌（用于红点显示）
+        if (card.isFirstGain) {
+          this._markCardAsNew(card.id)
+        }
+
         if (this._isLongPressing) {
           // 长按中：累积卡牌，显示 "+1🃏" 浮动文本
           this._pendingCards.push(card)
@@ -600,5 +620,18 @@ Page({
 
   onDismissCard() {
     this.setData({ cardGained: null })
+  },
+
+  /**
+   * 将卡牌标记为"新获得"，存入本地缓存，并显示卡牌 tab 红点
+   */
+  _markCardAsNew(cardId) {
+    const newCards = wx.getStorageSync('newCardIds') || []
+    if (!newCards.includes(cardId)) {
+      newCards.push(cardId)
+      wx.setStorageSync('newCardIds', newCards)
+    }
+    // 显示卡牌 tab 红点（index=1 是卡牌 tab）
+    wx.showTabBarRedDot({ index: 1 })
   }
 })

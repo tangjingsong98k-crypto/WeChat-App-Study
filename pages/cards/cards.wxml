@@ -41,6 +41,7 @@
             class="game-card {{item.owned ? '' : 'card-unowned'}}"
             style="background: {{item.owned ? item.setBg : '#f5f5f5'}}; border-color: {{item.owned ? item.setHue : '#e0e0e0'}};"
           >
+            <view class="card-new-dot" wx:if="{{item.isNew}}"></view>
             <view class="game-card-set-label" style="background: {{item.owned ? item.setBg : '#f5f5f5'}}; border-color: {{item.owned ? item.setHue : '#e0e0e0'}};">
               <text style="color: {{item.owned ? item.setHue : '#bbb'}};">{{item.setName}}</text>
             </view>
@@ -62,6 +63,7 @@
           class="game-card {{item.owned ? '' : 'card-unowned'}}"
           style="background: {{item.owned ? item.setBg : '#f5f5f5'}}; border-color: {{item.owned ? item.setHue : '#e0e0e0'}};"
         >
+          <view class="card-new-dot" wx:if="{{item.isNew}}"></view>
           <view class="game-card-set-label" style="background: {{item.owned ? item.setBg : '#f5f5f5'}}; border-color: {{item.owned ? item.setHue : '#e0e0e0'}};">
             <text style="color: {{item.owned ? item.setHue : '#bbb'}};">{{item.setName}}</text>
           </view>

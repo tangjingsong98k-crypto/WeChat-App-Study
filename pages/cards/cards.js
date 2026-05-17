@@ -30,10 +30,17 @@ Page({
     app.getLoginPromise().then(() => {
       this.loadData()
     })
+
+    // 隐藏卡牌 tab 红点
+    wx.hideTabBarRedDot({ index: 1 })
   },
 
   loadData() {
     this.setData({ loading: true })
+
+    // 读取新卡牌 ID 列表
+    const newCardIds = wx.getStorageSync('newCardIds') || []
+    const newCardSet = new Set(newCardIds)
 
     Promise.all([
       api.get('/cards'),
@@ -55,7 +62,8 @@ Page({
             stars: '★'.repeat(qualityInfo.stars),
             starsCount: qualityInfo.stars,
             qualityOrder: qualityInfo.order,
-            owned: card.owned_count > 0
+            owned: card.owned_count > 0,
+            isNew: newCardSet.has(card.id)
           }
         })
 
@@ -88,6 +96,11 @@ Page({
           allCards: processedCards,
           loading: false
         })
+
+        // 清除新卡牌标记
+        if (newCardIds.length > 0) {
+          wx.removeStorageSync('newCardIds')
+        }
       })
       .catch(() => {
         this.setData({ loading: false })

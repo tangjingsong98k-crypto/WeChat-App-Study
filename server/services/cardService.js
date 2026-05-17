@@ -24,7 +24,7 @@ function createCardService(options = {}) {
      * 1. Random check against GAIN_CARD_POSSIBILITY
      * 2. If passes: weighted random selection from all cards based on card_possibility
      * 3. Call addCardToUser to increment count
-     * 4. Return the gained card or null
+     * 4. Return the gained card or null (with isFirstGain flag)
      *
      * @param {number} userId
      * @returns {object|null} the gained card with details, or null if no card gained
@@ -46,11 +46,17 @@ function createCardService(options = {}) {
         return null;
       }
 
+      // Check if user already owns this card
+      const previousCount = model.getUserCardCount(userId, selectedCard.id);
+
       // 3. Add card to user's collection
       model.addCardToUser(userId, selectedCard.id);
 
-      // 4. Return the gained card
-      return selectedCard;
+      // 4. Return the gained card with first-gain flag
+      return {
+        ...selectedCard,
+        isFirstGain: previousCount === 0,
+      };
     },
 
     /**

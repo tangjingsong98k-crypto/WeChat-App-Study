@@ -197,3 +197,15 @@
   color: #555;
   font-weight: bold;
 }
+
+/* ========== 新卡牌红点 ========== */
+.card-new-dot {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 16rpx;
+  height: 16rpx;
+  background: #f44336;
+  border-radius: 50%;
+  z-index: 10;
+}
