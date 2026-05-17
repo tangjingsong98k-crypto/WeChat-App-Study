@@ -103,11 +103,10 @@
     </view>
   </view>
 
-  <!-- 卡牌获得通知 -->
+  <!-- 卡牌获得通知（单次点击） -->
   <view class="card-notification" wx:if="{{cardGained}}" bindtap="onDismissCard">
     <view class="card-notification-content">
       <text class="card-notification-title">🎉 获得卡牌！</text>
-      <!-- 卡牌 UI -->
       <view class="game-card-preview" style="background: {{cardGained._setBg}}; border-color: {{cardGained._setHue}};">
         <view class="game-card-preview-set" style="background: {{cardGained._setBg}}; border-color: {{cardGained._setHue}};">
           <text style="color: {{cardGained._setHue}};">{{cardGained._setName}}</text>
@@ -115,6 +114,33 @@
         <view class="game-card-preview-name">{{cardGained.card_name}}</view>
         <view class="game-card-preview-stars stars-{{cardGained._starsCount}}">{{cardGained._stars}}</view>
       </view>
+      <text class="card-notification-hint">点击关闭</text>
+    </view>
+  </view>
+
+  <!-- 多张卡牌获得通知（长按结束后） -->
+  <view class="card-notification" wx:if="{{cardsGained.length > 0}}" bindtap="onDismissCards">
+    <view class="card-notification-content">
+      <text class="card-notification-title">🎉 获得 {{cardsGained.length}} 张卡牌！</text>
+      <view class="cards-gained-grid">
+        <view class="game-card-preview game-card-preview-small" wx:for="{{cardsGained}}" wx:key="id" style="background: {{item._setBg}}; border-color: {{item._setHue}};">
+          <view class="game-card-preview-set" style="background: {{item._setBg}}; border-color: {{item._setHue}};">
+            <text style="color: {{item._setHue}};">{{item._setName}}</text>
+          </view>
+          <view class="game-card-preview-name">{{item.card_name}}</view>
+          <view class="game-card-preview-stars stars-{{item._starsCount}}">{{item._stars}}</view>
+        </view>
+      </view>
+      <text class="card-notification-hint">点击关闭</text>
+    </view>
+  </view>
+
+  <!-- 集齐卡组提示 -->
+  <view class="card-notification" wx:if="{{showSetComplete}}" bindtap="onDismissSetComplete">
+    <view class="card-notification-content">
+      <text class="card-notification-title">🏆 卡组集齐！</text>
+      <text class="set-complete-name">{{setCompleteInfo.setName}}</text>
+      <text class="set-complete-effect">{{setCompleteInfo.effectDescription}}</text>
       <text class="card-notification-hint">点击关闭</text>
     </view>
   </view>

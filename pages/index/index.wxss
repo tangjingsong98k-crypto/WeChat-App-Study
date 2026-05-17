@@ -379,12 +379,16 @@ page {
 .card-notification-content {
   background: #fff;
   border-radius: 24rpx;
-  padding: 60rpx 50rpx;
+  padding: 60rpx 30rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.2);
   animation: cardPopIn 0.3s ease;
+  width: 620rpx;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 @keyframes cardPopIn {
@@ -405,6 +409,51 @@ page {
   margin-top: 24rpx;
 }
 
+/* 多张卡牌网格 */
+.cards-gained-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  margin: 20rpx 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.game-card-preview-small {
+  min-width: auto;
+  min-height: 120rpx;
+  padding: 32rpx 8rpx 16rpx;
+  overflow: hidden;
+}
+
+.game-card-preview-small .game-card-preview-name {
+  font-size: 22rpx;
+  word-break: break-all;
+}
+
+.game-card-preview-small .game-card-preview-stars {
+  font-size: 18rpx;
+}
+
+.game-card-preview-small .game-card-preview-set {
+  font-size: 16rpx;
+  padding: 2rpx 8rpx;
+}
+
+/* 集齐卡组提示 */
+.set-complete-name {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #2e7d32;
+  margin-bottom: 12rpx;
+}
+
+.set-complete-effect {
+  font-size: 28rpx;
+  color: #4caf50;
+  margin-bottom: 16rpx;
+}
+
 /* 卡牌预览 UI（获取弹窗中） */
 .game-card-preview {
   position: relative;
@@ -415,8 +464,10 @@ page {
   padding: 50rpx 40rpx 30rpx;
   border-radius: 20rpx;
   border: 4rpx solid #ccc;
-  min-width: 280rpx;
-  min-height: 200rpx;
+  min-width: 240rpx;
+  min-height: 180rpx;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .game-card-preview-set {

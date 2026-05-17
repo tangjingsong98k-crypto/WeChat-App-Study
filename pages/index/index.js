@@ -29,7 +29,10 @@ Page({
     fertilizeCount: 0,
     countdown: '',
     fullRecoverText: '',
-    cardGained: null,
+    cardGained: null,        // 单张卡牌弹窗（单次点击时）
+    cardsGained: [],         // 多张卡牌弹窗（长按结束后）
+    showSetComplete: false,  // 集齐卡组提示
+    setCompleteInfo: null,
     loading: true,
     waterFloats: [],
     showLevelUp: false,
@@ -42,6 +45,7 @@ Page({
   _isLongPressing: false,
   _longPressCount: 0,
   _floatId: 0,
+  _pendingCards: [],  // 长按期间累积的卡牌
 
   onShow() {
     const app = getApp()
@@ -100,6 +104,15 @@ Page({
 
       // 基于服务端数据计算恢复满的时间
       this._initCountdown(user.water_count, user.last_water_recover_time)
+
+      // 初始化已完成卡组缓存
+      if (!this._lastCompletedSets) {
+        api.get('/cards/sets').then((data) => {
+          this._lastCompletedSets = new Set((data.sets || []).filter(s => s.completed).map(s => s.setId))
+        }).catch(() => {
+          this._lastCompletedSets = new Set()
+        })
+      }
     }).catch((err) => {
       if (err && err.message && err.message.indexOf('树种') !== -1) {
         wx.navigateTo({ url: '/pages/select-tree/select-tree' })
@@ -252,6 +265,7 @@ Page({
   },
 
   onWaterLongPressEnd() {
+    this._showPendingCards()
     this.stopLongPress()
   },
 
@@ -262,6 +276,35 @@ Page({
       clearTimeout(this._longPressTimer)
       this._longPressTimer = null
     }
+  },
+
+  /**
+   * 长按结束后一次性显示所有累积的卡牌
+   */
+  _showPendingCards() {
+    if (this._pendingCards.length === 0) return
+
+    const cards = this._pendingCards.slice()
+    this._pendingCards = []
+
+    // 处理卡牌显示数据
+    const processedCards = cards.map(card => {
+      const setConfig = SET_COLORS[card.card_set_id] || SET_COLORS['-1']
+      const starsCount = QUALITY_STARS[card.card_quality] || 1
+      return {
+        ...card,
+        _setName: setConfig.name,
+        _setHue: setConfig.hue,
+        _setBg: setConfig.bg,
+        _stars: '★'.repeat(starsCount),
+        _starsCount: starsCount
+      }
+    })
+
+    this.setData({ cardsGained: processedCards })
+
+    // 检查是否集齐了卡组
+    this._checkSetCompletion()
   },
 
   _doWater() {
@@ -286,17 +329,26 @@ Page({
 
       if (res.card) {
         const card = res.card
-        const setConfig = SET_COLORS[card.card_set_id] || SET_COLORS['-1']
-        const starsCount = QUALITY_STARS[card.card_quality] || 1
-        card._setName = setConfig.name
-        card._setHue = setConfig.hue
-        card._setBg = setConfig.bg
-        card._stars = '★'.repeat(starsCount)
-        card._starsCount = starsCount
-        this.setData({ cardGained: card })
-        setTimeout(() => { this.setData({ cardGained: null }) }, 3000)
+        if (this._isLongPressing) {
+          // 长按中：累积卡牌，显示 "+1🃏" 浮动文本
+          this._pendingCards.push(card)
+          this.showCardFloat()
+        } else {
+          // 单次点击：立即显示卡牌弹窗
+          const setConfig = SET_COLORS[card.card_set_id] || SET_COLORS['-1']
+          const starsCount = QUALITY_STARS[card.card_quality] || 1
+          card._setName = setConfig.name
+          card._setHue = setConfig.hue
+          card._setBg = setConfig.bg
+          card._stars = '★'.repeat(starsCount)
+          card._starsCount = starsCount
+          this.setData({ cardGained: card })
+          setTimeout(() => { this.setData({ cardGained: null }) }, 3000)
+          // 检查是否集齐卡组
+          this._checkSetCompletion()
+        }
 
-        // 获得卡牌后可能集齐套装，静默刷新用户数据以更新加成（如最大浇水次数）
+        // 获得卡牌后可能集齐套装，静默刷新用户数据以更新加成
         api.get('/user/info').then((userData) => {
           const user = userData.user
           const newMax = user.max_water_time || MAX_WATERING_TIME
@@ -377,6 +429,51 @@ Page({
       const current = this.data.waterFloats.filter(f => f.id !== id)
       this.setData({ waterFloats: current })
     }, 1000)
+  },
+
+  showCardFloat() {
+    const id = ++this._floatId
+    const floats = this.data.waterFloats.concat([{ id, text: '+1🃏' }])
+    this.setData({ waterFloats: floats })
+    setTimeout(() => {
+      const current = this.data.waterFloats.filter(f => f.id !== id)
+      this.setData({ waterFloats: current })
+    }, 1000)
+  },
+
+  /**
+   * 检查是否集齐了卡组，如果是则弹出提示
+   */
+  _checkSetCompletion() {
+    api.get('/cards/sets').then((data) => {
+      const sets = data.sets || []
+      const completed = sets.find(s => s.completed)
+      if (completed && !this._lastCompletedSets) {
+        this._lastCompletedSets = new Set()
+      }
+      // 找到新完成的卡组
+      const newlyCompleted = sets.filter(s => s.completed && this._lastCompletedSets && !this._lastCompletedSets.has(s.setId))
+      if (newlyCompleted.length > 0) {
+        newlyCompleted.forEach(s => this._lastCompletedSets.add(s.setId))
+        // 显示集齐提示（显示第一个新完成的）
+        this.setData({
+          showSetComplete: true,
+          setCompleteInfo: newlyCompleted[0]
+        })
+      }
+      // 更新已完成集合缓存
+      if (!this._lastCompletedSets) {
+        this._lastCompletedSets = new Set(sets.filter(s => s.completed).map(s => s.setId))
+      }
+    }).catch(() => {})
+  },
+
+  onDismissCards() {
+    this.setData({ cardsGained: [] })
+  },
+
+  onDismissSetComplete() {
+    this.setData({ showSetComplete: false, setCompleteInfo: null })
   },
 
   showLevelUpDialog(prevLevel, curLevel, growScore) {
