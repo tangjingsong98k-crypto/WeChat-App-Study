@@ -95,7 +95,7 @@ const treeController = {
         data: result,
       });
     } catch (err) {
-      if (err.code === 'TREE_NOT_SELECTED' || err.code === 'NO_FERTILIZE_COUNT') {
+      if (err.code === 'TREE_NOT_SELECTED' || err.code === 'NO_FERTILIZE_COUNT' || err.code === 'HEALTH_FULL') {
         return res.status(400).json({
           success: false,
           error: {

@@ -219,19 +219,23 @@ page {
 
 /* ========== 开发模式按钮 ========== */
 .dev-actions {
-  display: flex;
-  gap: 20rpx;
-  margin-top: 40rpx;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12rpx;
+  margin-top: 30rpx;
+  width: 80%;
+  box-sizing: border-box;
 }
 
 .dev-btn {
   font-size: 22rpx;
-  padding: 10rpx 24rpx;
+  padding: 12rpx 0;
   background: rgba(255, 152, 0, 0.15);
   color: #e65100;
   border: 2rpx solid #ff9800;
   border-radius: 20rpx;
   line-height: normal;
+  text-align: center;
 }
 
 .dev-btn::after {
@@ -409,26 +413,43 @@ page {
   margin-top: 24rpx;
 }
 
-/* 多张卡牌网格 */
-.cards-gained-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12rpx;
-  margin: 20rpx 0;
+/* 多张卡牌横向滚动 */
+.cards-gained-scroll {
   width: 100%;
-  box-sizing: border-box;
+  white-space: nowrap;
+  margin: 20rpx 0 8rpx;
+}
+
+.cards-gained-row {
+  display: inline-flex;
+  gap: 12rpx;
+  padding: 4rpx 8rpx;
+}
+
+.cards-gained-hint {
+  font-size: 20rpx;
+  color: #bbb;
+  margin-bottom: 12rpx;
 }
 
 .game-card-preview-small {
-  min-width: auto;
-  min-height: 120rpx;
-  padding: 32rpx 8rpx 16rpx;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 160rpx;
+  width: 160rpx;
+  min-height: 130rpx;
+  padding: 32rpx 10rpx 16rpx;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .game-card-preview-small .game-card-preview-name {
   font-size: 22rpx;
   word-break: break-all;
+  white-space: normal;
+  text-align: center;
 }
 
 .game-card-preview-small .game-card-preview-stars {
@@ -452,6 +473,25 @@ page {
   font-size: 28rpx;
   color: #4caf50;
   margin-bottom: 16rpx;
+}
+
+/* 结算通知 */
+.settlement-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  margin: 20rpx 0;
+}
+
+.settlement-item {
+  font-size: 30rpx;
+  color: #555;
+}
+
+.settlement-level-down {
+  color: #e53935;
+  font-weight: bold;
 }
 
 /* 卡牌预览 UI（获取弹窗中） */

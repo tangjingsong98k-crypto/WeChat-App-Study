@@ -179,6 +179,13 @@ function createTreeService(options = {}) {
         throw error;
       }
 
+      // 1.5 Check if health is already at max
+      if (tree.health_score >= 100) {
+        const error = new Error('健康值已满');
+        error.code = 'HEALTH_FULL';
+        throw error;
+      }
+
       // 2. Get user from database to check fertilize_count
       const user = userMdl.findById(userId);
 

@@ -79,6 +79,18 @@ function createTables(database) {
       participate INTEGER NOT NULL DEFAULT 0,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
+
+    CREATE TABLE IF NOT EXISTS settlement_results (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER UNIQUE NOT NULL,
+      health_lost INTEGER NOT NULL DEFAULT 0,
+      grow_lost INTEGER NOT NULL DEFAULT 0,
+      level_before INTEGER NOT NULL DEFAULT 0,
+      level_after INTEGER NOT NULL DEFAULT 0,
+      settle_time INTEGER NOT NULL DEFAULT 0,
+      read_flag INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
   `);
 }
 

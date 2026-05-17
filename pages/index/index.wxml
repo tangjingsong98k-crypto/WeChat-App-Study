@@ -60,14 +60,14 @@
 
     <view class="action-btn-wrapper">
       <button
-        class="action-btn fertilize-btn {{fertilizeCount <= 0 ? 'disabled' : ''}}"
-        disabled="{{fertilizeCount <= 0}}"
+        class="action-btn fertilize-btn {{fertilizeCount <= 0 || healthScore >= 100 ? 'disabled' : ''}}"
+        disabled="{{fertilizeCount <= 0 || healthScore >= 100}}"
         bindtap="onFertilize"
       >
         <text class="btn-icon">🌿</text>
         <text class="btn-text">施肥</text>
       </button>
-      <view class="count-display">{{fertilizeCount}}</view>
+      <view class="count-display">{{healthScore >= 100 ? '已满' : fertilizeCount}}</view>
     </view>
   </view>
 
@@ -76,10 +76,11 @@
     <text class="full-recover-text">💧 {{fullRecoverText}}</text>
   </view>
 
-  <!-- 开发模式：无限浇水/施肥按钮 -->
+  <!-- 开发模式调试按钮 -->
   <view class="dev-actions" wx:if="{{isDev}}">
-    <button class="dev-btn" bindtap="onDevWater">🔧 无限浇水</button>
-    <button class="dev-btn" bindtap="onDevFertilize">🔧 无限施肥</button>
+    <button class="dev-btn" bindtap="onDevWater">🔧无限浇水</button>
+    <button class="dev-btn" bindtap="onDevFertilize">🔧无限施肥</button>
+    <button class="dev-btn" bindtap="onDevSettle">🔧触发结算</button>
   </view>
 
   <!-- 升级弹窗 -->
@@ -120,18 +121,21 @@
 
   <!-- 多张卡牌获得通知（长按结束后） -->
   <view class="card-notification" wx:if="{{cardsGained.length > 0}}" bindtap="onDismissCards">
-    <view class="card-notification-content">
+    <view class="card-notification-content" catchtap="">
       <text class="card-notification-title">🎉 获得 {{cardsGained.length}} 张卡牌！</text>
-      <view class="cards-gained-grid">
-        <view class="game-card-preview game-card-preview-small" wx:for="{{cardsGained}}" wx:key="id" style="background: {{item._setBg}}; border-color: {{item._setHue}};">
-          <view class="game-card-preview-set" style="background: {{item._setBg}}; border-color: {{item._setHue}};">
-            <text style="color: {{item._setHue}};">{{item._setName}}</text>
+      <scroll-view class="cards-gained-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+        <view class="cards-gained-row">
+          <view class="game-card-preview game-card-preview-small" wx:for="{{cardsGained}}" wx:key="id" style="background: {{item._setBg}}; border-color: {{item._setHue}};">
+            <view class="game-card-preview-set" style="background: {{item._setBg}}; border-color: {{item._setHue}};">
+              <text style="color: {{item._setHue}};">{{item._setName}}</text>
+            </view>
+            <view class="game-card-preview-name">{{item.card_name}}</view>
+            <view class="game-card-preview-stars stars-{{item._starsCount}}">{{item._stars}}</view>
           </view>
-          <view class="game-card-preview-name">{{item.card_name}}</view>
-          <view class="game-card-preview-stars stars-{{item._starsCount}}">{{item._stars}}</view>
         </view>
-      </view>
-      <text class="card-notification-hint">点击关闭</text>
+      </scroll-view>
+      <text class="cards-gained-hint">← 左右滑动查看 →</text>
+      <text class="card-notification-hint" bindtap="onDismissCards">点击关闭</text>
     </view>
   </view>
 
@@ -141,6 +145,21 @@
       <text class="card-notification-title">🏆 卡组集齐！</text>
       <text class="set-complete-name">{{setCompleteInfo.setName}}</text>
       <text class="set-complete-effect">{{setCompleteInfo.effectDescription}}</text>
+      <text class="card-notification-hint">点击关闭</text>
+    </view>
+  </view>
+
+  <!-- 每日结算通知 -->
+  <view class="card-notification" wx:if="{{showSettlement}}" bindtap="onDismissSettlement">
+    <view class="card-notification-content">
+      <text class="card-notification-title">🌙 每日结算</text>
+      <view class="settlement-details">
+        <text class="settlement-item">健康值 -{{settlementInfo.healthLost}}</text>
+        <text class="settlement-item" wx:if="{{settlementInfo.growLost > 0}}">⚠️ 成长值 -{{settlementInfo.growLost}}</text>
+        <text class="settlement-item settlement-level-down" wx:if="{{settlementInfo.levelBefore > settlementInfo.levelAfter}}">
+          📉 等级下降 Lv.{{settlementInfo.levelBefore}} → Lv.{{settlementInfo.levelAfter}}
+        </text>
+      </view>
       <text class="card-notification-hint">点击关闭</text>
     </view>
   </view>

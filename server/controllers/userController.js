@@ -73,6 +73,43 @@ const userController = {
       });
     }
   },
+
+  /**
+   * GET /api/user/settlement
+   * Check for unread settlement results.
+   */
+  getSettlement(req, res) {
+    try {
+      const { getDb } = require('../db/init');
+      const db = getDb();
+      const result = db.prepare(
+        'SELECT * FROM settlement_results WHERE user_id = ? AND read_flag = 0'
+      ).get(req.user.id);
+
+      if (!result) {
+        return res.json({ success: true, data: { hasSettlement: false } });
+      }
+
+      // Mark as read
+      db.prepare('UPDATE settlement_results SET read_flag = 1 WHERE user_id = ?').run(req.user.id);
+
+      return res.json({
+        success: true,
+        data: {
+          hasSettlement: true,
+          healthLost: result.health_lost,
+          growLost: result.grow_lost,
+          levelBefore: result.level_before,
+          levelAfter: result.level_after,
+        },
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: '获取结算信息失败' },
+      });
+    }
+  },
 };
 
 module.exports = userController;

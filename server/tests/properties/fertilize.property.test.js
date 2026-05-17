@@ -33,9 +33,9 @@ describe('Property 3: 施肥健康值计算正确性', () => {
   });
 
   /**
-   * Arbitrary: initial health score in range [0, 100]
+   * Arbitrary: initial health score in range [0, 99] (100 is blocked by HEALTH_FULL)
    */
-  const healthScoreArb = fc.integer({ min: 0, max: 100 });
+  const healthScoreArb = fc.integer({ min: 0, max: 99 });
 
   /**
    * Arbitrary: tree species

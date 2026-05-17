@@ -148,6 +148,67 @@ function createTestController(options = {}) {
         });
       }
     },
+
+    /**
+     * POST /api/test/settle
+     * Trigger daily settlement for all users (for dev testing).
+     * Returns per-user settlement results.
+     */
+    settle(req, res) {
+      try {
+        const settlementService = require('../services/settlementService');
+        const db = getDatabase();
+
+        // Get all trees before settlement for comparison
+        const treesBefore = {};
+        const trees = db.prepare('SELECT * FROM trees').all();
+        trees.forEach(t => {
+          treesBefore[t.user_id] = { health_score: t.health_score, grow_score: t.grow_score, level: t.level };
+        });
+
+        // Execute settlement
+        const result = settlementService.executeDailySettlement();
+
+        // Get all trees after settlement for comparison
+        const results = [];
+        const treesAfter = db.prepare('SELECT * FROM trees').all();
+        treesAfter.forEach(t => {
+          const before = treesBefore[t.user_id];
+          if (before) {
+            results.push({
+              userId: t.user_id,
+              healthBefore: before.health_score,
+              healthAfter: t.health_score,
+              healthLost: before.health_score - t.health_score,
+              growBefore: before.grow_score,
+              growAfter: t.grow_score,
+              growLost: before.grow_score - t.grow_score,
+              levelBefore: before.level,
+              levelAfter: t.level,
+            });
+          }
+        });
+
+        // Store settlement results for users to query
+        const settleTime = Date.now();
+        results.forEach(r => {
+          db.prepare(`
+            INSERT OR REPLACE INTO settlement_results (user_id, health_lost, grow_lost, level_before, level_after, settle_time)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `).run(r.userId, r.healthLost, r.growLost, r.levelBefore, r.levelAfter, settleTime);
+        });
+
+        return res.json({
+          success: true,
+          data: { ...result, details: results },
+        });
+      } catch (err) {
+        return res.status(500).json({
+          success: false,
+          error: { code: 'INTERNAL_ERROR', message: '结算失败: ' + err.message },
+        });
+      }
+    },
   };
 }
 

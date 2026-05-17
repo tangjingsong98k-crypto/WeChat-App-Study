@@ -37,6 +37,8 @@ Page({
     waterFloats: [],
     showLevelUp: false,
     levelUpInfo: null,
+    showSettlement: false,
+    settlementInfo: null,
     isDev: false
   },
 
@@ -46,6 +48,7 @@ Page({
   _longPressCount: 0,
   _floatId: 0,
   _pendingCards: [],  // 长按期间累积的卡牌
+  _optimisticWaterCount: 0, // 乐观计数：本地预估剩余浇水次数
 
   onShow() {
     const app = getApp()
@@ -113,6 +116,9 @@ Page({
           this._lastCompletedSets = new Set()
         })
       }
+
+      // 检查是否有未读结算通知
+      this._checkSettlement()
     }).catch((err) => {
       if (err && err.message && err.message.indexOf('树种') !== -1) {
         wx.navigateTo({ url: '/pages/select-tree/select-tree' })
@@ -237,6 +243,7 @@ Page({
     if (this.data.waterCount <= 0) return
     this._isLongPressing = true
     this._longPressCount = 0
+    this._optimisticWaterCount = this.data.waterCount
     this._doWater()
     this._scheduleLongPress()
   },
@@ -248,13 +255,13 @@ Page({
   },
 
   _scheduleLongPress() {
-    if (!this._isLongPressing || this.data.waterCount <= 0) {
+    if (!this._isLongPressing || this._optimisticWaterCount <= 0) {
       this.stopLongPress()
       return
     }
     const interval = this._getLongPressInterval()
     this._longPressTimer = setTimeout(() => {
-      if (!this._isLongPressing || this.data.waterCount <= 0) {
+      if (!this._isLongPressing || this._optimisticWaterCount <= 0) {
         this.stopLongPress()
         return
       }
@@ -287,18 +294,30 @@ Page({
     const cards = this._pendingCards.slice()
     this._pendingCards = []
 
-    // 处理卡牌显示数据
+    // 排序：新种类优先，然后稀有度从高到低
+    const qualityOrder = { legendary: 0, epic: 1, rare: 2, common: 3 }
+    const seenCards = new Set()
     const processedCards = cards.map(card => {
       const setConfig = SET_COLORS[card.card_set_id] || SET_COLORS['-1']
       const starsCount = QUALITY_STARS[card.card_quality] || 1
+      const isNew = !seenCards.has(card.id)
+      seenCards.add(card.id)
       return {
         ...card,
         _setName: setConfig.name,
         _setHue: setConfig.hue,
         _setBg: setConfig.bg,
         _stars: '★'.repeat(starsCount),
-        _starsCount: starsCount
+        _starsCount: starsCount,
+        _isNew: isNew,
+        _qualityOrder: qualityOrder[card.card_quality] || 3
       }
+    })
+
+    // 新种类优先，然后稀有度高的优先
+    processedCards.sort((a, b) => {
+      if (a._isNew !== b._isNew) return a._isNew ? -1 : 1
+      return a._qualityOrder - b._qualityOrder
     })
 
     this.setData({ cardsGained: processedCards })
@@ -308,7 +327,14 @@ Page({
   },
 
   _doWater() {
-    if (this.data.waterCount <= 0) return
+    if (this._optimisticWaterCount <= 0 && this._isLongPressing) return
+    if (this.data.waterCount <= 0 && !this._isLongPressing) return
+
+    // 乐观递减：立即减少本地计数，不等服务端响应
+    if (this._isLongPressing) {
+      this._optimisticWaterCount--
+    }
+
     const prevLevel = this.data.level
     const prevGrowScore = this.data.growScore
 
@@ -323,6 +349,11 @@ Page({
         waterCount: res.waterCount,
         growPercent: this.calcGrowPercent(newGrowScore, newLevel)
       })
+
+      // 同步乐观计数（取服务端值和本地乐观值的较小值，防止回弹）
+      if (this._isLongPressing) {
+        this._optimisticWaterCount = Math.min(this._optimisticWaterCount, res.waterCount)
+      }
 
       // 显示实际增加的成长值
       this.showWaterFloat(actualGain)
@@ -421,6 +452,39 @@ Page({
     }).catch(() => {})
   },
 
+  // 测试模式：触发全服结算
+  onDevSettle() {
+    wx.showLoading({ title: '结算中...' })
+    api.post('/test/settle').then(() => {
+      wx.hideLoading()
+      // 结算完成后刷新数据并检查结算通知
+      this._fetchAndApply()
+      setTimeout(() => {
+        this._checkSettlement()
+      }, 500)
+    }).catch(() => {
+      wx.hideLoading()
+    })
+  },
+
+  /**
+   * 检查是否有未读的结算通知
+   */
+  _checkSettlement() {
+    api.get('/user/settlement').then((data) => {
+      if (data.hasSettlement) {
+        this.setData({
+          showSettlement: true,
+          settlementInfo: data
+        })
+      }
+    }).catch(() => {})
+  },
+
+  onDismissSettlement() {
+    this.setData({ showSettlement: false, settlementInfo: null })
+  },
+
   showWaterFloat(amount) {
     const id = ++this._floatId
     const floats = this.data.waterFloats.concat([{ id, text: `+${amount}💧` }])
@@ -512,7 +576,7 @@ Page({
   // ========== 施肥逻辑 ==========
 
   onFertilize() {
-    if (this.data.fertilizeCount <= 0) return
+    if (this.data.fertilizeCount <= 0 || this.data.healthScore >= 100) return
     api.post('/tree/fertilize').then((res) => {
       this.setData({
         healthScore: res.healthScore,
