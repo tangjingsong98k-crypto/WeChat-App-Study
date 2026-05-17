@@ -6,8 +6,11 @@ const {
   MAX_WATERING_TIME,
   DAILY_FERTILIZE_RESUME_TIMES,
   MAX_FERTILIZE_COUNT,
+  SET_BONUS_MAX_WATER,
 } = require('../config');
 const { getDb } = require('../db/init');
+const defaultCardService = require('./cardService');
+const { createCardService } = require('./cardService');
 
 /**
  * User Service - handles login logic, user info retrieval, and daily fertilize recovery.
@@ -21,6 +24,7 @@ function createUserService(options = {}) {
   const getDatabase = options.getDatabase || getDb;
   const model = options.userModel || (options.getDatabase ? createUserModel({ getDatabase: options.getDatabase }) : userModel);
   const wateringTimer = options.wateringTimerService || (options.getDatabase ? createWateringTimerService({ getDatabase: options.getDatabase }) : defaultWateringTimerService);
+  const cardSvc = options.cardService !== undefined ? options.cardService : (options.getDatabase ? createCardService({ getDatabase: options.getDatabase }) : defaultCardService);
 
   return {
     /**
@@ -86,8 +90,16 @@ function createUserService(options = {}) {
       const user = model.findById(userId);
       if (!user) return null;
 
+      // Calculate effective max water time (with set 3 bonus)
+      let maxWaterTime = MAX_WATERING_TIME;
+      if (cardSvc && typeof cardSvc.hasCompletedSet === 'function') {
+        if (cardSvc.hasCompletedSet(userId, 3)) {
+          maxWaterTime += SET_BONUS_MAX_WATER;
+        }
+      }
+
       // Apply lazy calculation to get actual current water count
-      const { currentCount, newRecoverTime } = wateringTimer.calculateAvailableWaterCount(user);
+      const { currentCount, newRecoverTime } = wateringTimer.calculateAvailableWaterCount(user, maxWaterTime);
 
       const db = getDatabase();
       const tree = db.prepare('SELECT * FROM trees WHERE user_id = ?').get(user.id);
@@ -96,6 +108,7 @@ function createUserService(options = {}) {
         ...user,
         water_count: currentCount,
         last_water_recover_time: newRecoverTime,
+        max_water_time: maxWaterTime,
         tree: tree || null,
       };
     },

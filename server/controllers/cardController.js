@@ -6,11 +6,11 @@ const cardService = require('../services/cardService');
 const cardController = {
   /**
    * GET /api/cards
-   * Get the authenticated user's card collection.
+   * Get all cards with the authenticated user's ownership status.
    */
   getCards(req, res) {
     try {
-      const cards = cardService.getUserCards(req.user.id);
+      const cards = cardService.getAllCardsWithOwnership(req.user.id);
 
       return res.json({
         success: true,

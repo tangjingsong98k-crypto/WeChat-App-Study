@@ -99,9 +99,9 @@ function seedData(database) {
 
   const seedTransaction = database.transaction(() => {
     // Insert card sets
-    insertSet.run('四季之歌', '集齐后浇水成长值翻倍持续1小时');
-    insertSet.run('森林守护者', '集齐后每日健康值扣除减半持续3天');
-    insertSet.run('彩虹花园', '集齐后获得稀有卡牌概率提升50%持续1天');
+    insertSet.run('四季之歌', '每次浇水额外增加5点成长值');
+    insertSet.run('森林守护者', '每天扣除的健康值减少5点');
+    insertSet.run('彩虹花园', '浇水次数积累上限+5');
 
     // Insert cards - 四季之歌 set (id=1)
     insertCard.run('春之芽', '/images/cards/spring_bud.png', 'common', 30, 1);

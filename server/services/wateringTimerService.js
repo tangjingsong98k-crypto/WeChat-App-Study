@@ -1,6 +1,6 @@
 const { getDb } = require('../db/init');
 const { createUserModel } = require('../models/userModel');
-const { WATERING_RESUME_INTERVAL, MAX_WATERING_TIME } = require('../config');
+const { WATERING_RESUME_INTERVAL, MAX_WATERING_TIME, SET_BONUS_MAX_WATER } = require('../config');
 
 /**
  * Watering Timer Service - handles lazy calculation of available watering count
@@ -24,33 +24,26 @@ function createWateringTimerService(options = {}) {
      * Calculate the current available watering count for a user based on
      * elapsed time since last_water_recover_time.
      *
-     * Logic:
-     * 1. elapsed = now - user.last_water_recover_time
-     * 2. recovered = floor(elapsed / WATERING_RESUME_INTERVAL)
-     * 3. currentCount = min(user.water_count + recovered, MAX_WATERING_TIME)
-     * 4. newRecoverTime = last_water_recover_time + (recovered * WATERING_RESUME_INTERVAL)
-     * 5. If currentCount >= MAX_WATERING_TIME, newRecoverTime = now (stop accumulating)
-     *
      * @param {object} user - User record from database
      * @param {number} user.water_count - Stored watering count
      * @param {number} user.last_water_recover_time - Timestamp of last recovery calculation
+     * @param {number} [effectiveMax] - Override max watering time (for set bonus)
      * @returns {{ currentCount: number, newRecoverTime: number, recovered: number }}
      */
-    calculateAvailableWaterCount(user) {
+    calculateAvailableWaterCount(user, effectiveMax) {
+      const maxWater = effectiveMax || MAX_WATERING_TIME;
       const now = getNow();
       const elapsed = now - user.last_water_recover_time;
       const recovered = Math.floor(elapsed / WATERING_RESUME_INTERVAL);
       const currentCount = Math.min(
         user.water_count + recovered,
-        MAX_WATERING_TIME
+        maxWater
       );
 
       let newRecoverTime;
-      if (currentCount >= MAX_WATERING_TIME) {
-        // At max capacity, stop accumulating - set recover time to now
+      if (currentCount >= maxWater) {
         newRecoverTime = now;
       } else {
-        // Advance recover time by the number of recovered intervals
         newRecoverTime = user.last_water_recover_time + (recovered * WATERING_RESUME_INTERVAL);
       }
 
@@ -70,10 +63,12 @@ function createWateringTimerService(options = {}) {
      * 7. Return updated water count and next recover time
      *
      * @param {number} userId - User ID
-     * @returns {{ waterCount: number, nextRecoverTime: number }}
+     * @param {number} [effectiveMax] - Override max watering time (for set bonus)
+     * @returns {{ waterCount: number, nextRecoverTime: number, maxWaterTime: number }}
      * @throws {Error} If user not found or no watering count available
      */
-    consumeWaterCount(userId) {
+    consumeWaterCount(userId, effectiveMax) {
+      const maxWater = effectiveMax || MAX_WATERING_TIME;
       const user = model.findById(userId);
       if (!user) {
         const error = new Error('用户不存在');
@@ -81,7 +76,7 @@ function createWateringTimerService(options = {}) {
         throw error;
       }
 
-      const { currentCount, newRecoverTime } = this.calculateAvailableWaterCount(user);
+      const { currentCount, newRecoverTime } = this.calculateAvailableWaterCount(user, maxWater);
 
       if (currentCount <= 0) {
         const error = new Error('浇水次数不足，请等待恢复');
@@ -93,11 +88,9 @@ function createWateringTimerService(options = {}) {
       const now = getNow();
       let recoverTimeToStore;
 
-      if (currentCount >= MAX_WATERING_TIME) {
-        // Was at max, now consuming one - start recovery timer from now
+      if (currentCount >= maxWater) {
         recoverTimeToStore = now;
       } else {
-        // Keep the calculated newRecoverTime
         recoverTimeToStore = newRecoverTime;
       }
 
@@ -110,6 +103,7 @@ function createWateringTimerService(options = {}) {
       return {
         waterCount: newWaterCount,
         nextRecoverTime: recoverTimeToStore + WATERING_RESUME_INTERVAL,
+        maxWaterTime: maxWater,
       };
     },
   };

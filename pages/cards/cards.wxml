@@ -9,12 +9,18 @@
     <view class="section" wx:if="{{sets.length > 0}}">
       <view class="section-title">卡牌套装</view>
       <view class="sets-list">
-        <view class="set-item {{item.completed ? 'set-completed' : ''}}" wx:for="{{sets}}" wx:key="setId">
+        <view
+          class="set-item {{item.completed ? 'set-completed' : ''}} {{expandedSetId === item.setId ? 'set-expanded' : ''}}"
+          wx:for="{{sets}}"
+          wx:key="setId"
+          bindtap="onToggleSet"
+          data-setid="{{item.setId}}"
+        >
           <view class="set-header">
             <view class="set-name">{{item.setName}}</view>
-            <view class="set-status">
-              <text wx:if="{{item.completed}}" class="set-check">✓ 已完成</text>
-              <text wx:else class="set-incomplete">未完成</text>
+            <view class="set-right">
+              <text class="set-progress">{{item.progress}}</text>
+              <text wx:if="{{item.completed}}" class="set-check">✓</text>
             </view>
           </view>
           <view class="set-effect">{{item.effectDescription}}</view>
@@ -22,24 +28,46 @@
       </view>
     </view>
 
-    <!-- 卡牌列表区域 -->
-    <view class="section">
-      <view class="section-title">我的卡牌</view>
-      <view class="empty-tip" wx:if="{{cards.length === 0}}">
-        <text>暂无卡牌，浇水时有机会获得哦~</text>
+    <!-- 展开的卡组卡牌 -->
+    <view class="section" wx:if="{{expandedSetId !== -999}}">
+      <view class="section-title-row">
+        <text class="section-title">卡组详情</text>
+        <text class="show-all-btn" bindtap="onShowAll">查看全部</text>
       </view>
-      <view class="card-grid" wx:else>
-        <view class="game-card set-{{item.card_set_id}}" wx:for="{{cards}}" wx:key="card_id" style="background: {{item.setBg}}; border-color: {{item.setHue}};">
-          <!-- 卡组名称：顶部居中小字，带衬线遮挡效果 -->
-          <view class="game-card-set-label" style="background: {{item.setBg}}; border-color: {{item.setHue}};">
-            <text style="color: {{item.setHue}};">{{item.setName}}</text>
+      <view class="card-grid">
+        <block wx:for="{{allCards}}" wx:key="id">
+          <view
+            wx:if="{{item.card_set_id === expandedSetId}}"
+            class="game-card {{item.owned ? '' : 'card-unowned'}}"
+            style="background: {{item.owned ? item.setBg : '#f5f5f5'}}; border-color: {{item.owned ? item.setHue : '#e0e0e0'}};"
+          >
+            <view class="game-card-set-label" style="background: {{item.owned ? item.setBg : '#f5f5f5'}}; border-color: {{item.owned ? item.setHue : '#e0e0e0'}};">
+              <text style="color: {{item.owned ? item.setHue : '#bbb'}};">{{item.setName}}</text>
+            </view>
+            <view class="game-card-name {{item.owned ? '' : 'text-gray'}}">{{item.card_name}}</view>
+            <view class="game-card-stars stars-{{item.owned ? item.starsCount : 0}}">{{item.stars}}</view>
+            <view class="game-card-owned {{item.owned ? '' : 'text-gray'}}">x{{item.owned_count}}</view>
           </view>
-          <!-- 卡牌名称：居中 -->
-          <view class="game-card-name">{{item.card_name}}</view>
-          <!-- 稀有度星星：居中在名称下方 -->
-          <view class="game-card-stars stars-{{item.starsCount}}">{{item.stars}}</view>
-          <!-- 拥有数量 -->
-          <view class="game-card-count">×{{item.owned_count}}</view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 全部卡牌列表 -->
+    <view class="section" wx:if="{{expandedSetId === -999}}">
+      <view class="section-title">全部卡牌</view>
+      <view class="card-grid">
+        <view
+          wx:for="{{allCards}}"
+          wx:key="id"
+          class="game-card {{item.owned ? '' : 'card-unowned'}}"
+          style="background: {{item.owned ? item.setBg : '#f5f5f5'}}; border-color: {{item.owned ? item.setHue : '#e0e0e0'}};"
+        >
+          <view class="game-card-set-label" style="background: {{item.owned ? item.setBg : '#f5f5f5'}}; border-color: {{item.owned ? item.setHue : '#e0e0e0'}};">
+            <text style="color: {{item.owned ? item.setHue : '#bbb'}};">{{item.setName}}</text>
+          </view>
+          <view class="game-card-name {{item.owned ? '' : 'text-gray'}}">{{item.card_name}}</view>
+          <view class="game-card-stars stars-{{item.owned ? item.starsCount : 0}}">{{item.stars}}</view>
+          <view class="game-card-owned {{item.owned ? '' : 'text-gray'}}">x{{item.owned_count}}</view>
         </view>
       </view>
     </view>

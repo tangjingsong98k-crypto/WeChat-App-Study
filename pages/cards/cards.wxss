@@ -31,6 +31,24 @@
   border-left: 8rpx solid #7b1fa2;
 }
 
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.section-title-row .section-title {
+  margin-bottom: 0;
+}
+
+.show-all-btn {
+  font-size: 26rpx;
+  color: #7b1fa2;
+  font-weight: bold;
+}
+
+/* 套装列表 */
 .sets-list {
   display: flex;
   flex-direction: column;
@@ -50,6 +68,11 @@
   background: #f1f8e9;
 }
 
+.set-item.set-expanded {
+  border-color: #7b1fa2;
+  box-shadow: 0 4rpx 16rpx rgba(123, 31, 162, 0.15);
+}
+
 .set-header {
   display: flex;
   justify-content: space-between;
@@ -63,20 +86,32 @@
   color: #333;
 }
 
-.set-check {
-  font-size: 24rpx;
-  color: #4caf50;
+.set-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.set-progress {
+  font-size: 26rpx;
+  color: #666;
   font-weight: bold;
 }
 
-.set-incomplete {
-  font-size: 24rpx;
-  color: #999;
+.set-check {
+  font-size: 26rpx;
+  color: #4caf50;
+  font-weight: bold;
 }
 
 .set-effect {
   font-size: 26rpx;
   color: #666;
+}
+
+.set-completed .set-effect {
+  color: #2e7d32;
+  font-weight: bold;
 }
 
 .empty-tip {
@@ -107,7 +142,16 @@
   overflow: hidden;
 }
 
-/* 卡组名称标签：顶部居中，带衬线遮挡效果 */
+/* 未拥有的卡牌 */
+.game-card.card-unowned {
+  opacity: 0.7;
+}
+
+.text-gray {
+  color: #bbb !important;
+}
+
+/* 卡组名称标签 */
 .game-card-set-label {
   position: absolute;
   top: -2rpx;
@@ -142,10 +186,14 @@
 .game-card-stars.stars-2 { color: #42a5f5; }
 .game-card-stars.stars-3 { color: #ab47bc; }
 .game-card-stars.stars-5 { color: #ffa000; }
+.game-card-stars.stars-0 { color: #ddd; }
 
-/* 拥有数量 */
-.game-card-count {
+/* 拥有数量：右下角 */
+.game-card-owned {
+  position: absolute;
+  bottom: 8rpx;
+  right: 12rpx;
   font-size: 22rpx;
-  color: #666;
+  color: #555;
   font-weight: bold;
 }

@@ -89,6 +89,24 @@ function createCardService(options = {}) {
     },
 
     /**
+     * Get ALL cards with user's owned count (0 for unowned).
+     * @param {number} userId
+     * @returns {Array} all cards with owned_count field
+     */
+    getAllCardsWithOwnership(userId) {
+      const allCards = model.getAllCards();
+      const userCards = model.getUserCards(userId);
+      const ownedMap = new Map();
+      for (const uc of userCards) {
+        ownedMap.set(uc.card_id, uc.owned_count);
+      }
+      return allCards.map(card => ({
+        ...card,
+        owned_count: ownedMap.get(card.id) || 0,
+      }));
+    },
+
+    /**
      * Check set completion status for a user.
      * For each set, check if user owns at least 1 of every card in that set.
      *
@@ -118,6 +136,25 @@ function createCardService(options = {}) {
           completed,
         };
       });
+    },
+
+    /**
+     * Check if a user has completed a specific set.
+     * @param {number} userId
+     * @param {number} setId
+     * @returns {boolean}
+     */
+    hasCompletedSet(userId, setId) {
+      const userCards = model.getUserCards(userId);
+      const setCards = model.getCardsBySetId(setId);
+      if (setCards.length === 0) return false;
+
+      const ownedMap = new Map();
+      for (const uc of userCards) {
+        ownedMap.set(uc.card_id, uc.owned_count);
+      }
+
+      return setCards.every((card) => (ownedMap.get(card.id) || 0) >= 1);
     },
   };
 }

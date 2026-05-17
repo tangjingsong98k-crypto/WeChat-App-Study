@@ -2,27 +2,29 @@ const { getDb } = require('../db/init');
 const { createTreeModel } = require('../models/treeModel');
 const defaultTreeService = require('./treeService');
 const { createTreeService } = require('./treeService');
+const defaultCardService = require('./cardService');
+const { createCardService } = require('./cardService');
 const {
   DAILY_DECLINE_HEALTH_SCORE,
   LOW_HEALTH_SCORE,
   UPGRADE_NEED_GROW_SCORE,
+  SET_BONUS_HEALTH_REDUCE,
 } = require('../config');
 
 /**
  * Settlement Service - handles daily settlement logic.
  *
- * Each day, every user's tree health declines. If health drops below the
- * low threshold, grow score is also deducted, potentially causing level loss.
- *
  * @param {object} [options] - Optional configuration
  * @param {function} [options.getDatabase] - Custom database getter (for testing)
  * @param {object} [options.treeModel] - Custom tree model instance (for testing)
  * @param {object} [options.treeService] - Custom tree service instance (for testing)
+ * @param {object} [options.cardService] - Custom card service instance (for testing)
  */
 function createSettlementService(options = {}) {
   const getDatabase = options.getDatabase || getDb;
   const model = options.treeModel || createTreeModel({ getDatabase });
   const treeSvc = options.treeService || createTreeService({ getDatabase });
+  const cardSvc = options.cardService !== undefined ? options.cardService : (options.getDatabase ? createCardService({ getDatabase }) : defaultCardService);
 
   return {
     /**
@@ -79,8 +81,14 @@ function createSettlementService(options = {}) {
 
       // Use a transaction to ensure atomicity
       const settle = db.transaction(() => {
-        // Step 2: Decrease health_score
-        let newHealthScore = tree.health_score - DAILY_DECLINE_HEALTH_SCORE;
+        // Step 2: Decrease health_score (with set 2 bonus if completed)
+        let healthDecline = DAILY_DECLINE_HEALTH_SCORE;
+        if (cardSvc && typeof cardSvc.hasCompletedSet === 'function') {
+          if (cardSvc.hasCompletedSet(userId, 2)) {
+            healthDecline = Math.max(healthDecline - SET_BONUS_HEALTH_REDUCE, 0);
+          }
+        }
+        let newHealthScore = tree.health_score - healthDecline;
 
         // Step 3: Floor at 0
         if (newHealthScore < 0) {

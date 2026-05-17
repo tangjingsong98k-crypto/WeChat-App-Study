@@ -2,7 +2,7 @@ const treeModel = require('../models/treeModel');
 const { createTreeModel } = require('../models/treeModel');
 const userModelModule = require('../models/userModel');
 const { createUserModel } = require('../models/userModel');
-const { TREE_SPECIES, UPGRADE_NEED_GROW_SCORE, WATERING_GROW_SCORE, USER_FERTILIZE_RECOVER_EFFECT } = require('../config');
+const { TREE_SPECIES, UPGRADE_NEED_GROW_SCORE, WATERING_GROW_SCORE, USER_FERTILIZE_RECOVER_EFFECT, SET_BONUS_GROW_SCORE, SET_BONUS_MAX_WATER, MAX_WATERING_TIME } = require('../config');
 const { getDb } = require('../db/init');
 const defaultWateringTimerService = require('./wateringTimerService');
 const defaultCardService = require('./cardService');
@@ -104,11 +104,23 @@ function createTreeService(options = {}) {
         throw error;
       }
 
-      // 2. Consume one watering count (throws NO_WATER_COUNT if 0)
-      const { waterCount, nextRecoverTime } = wateringTimer.consumeWaterCount(userId);
+      // 2. Consume one watering count (with set 3 bonus for max capacity)
+      let effectiveMax = MAX_WATERING_TIME;
+      if (cardService && typeof cardService.hasCompletedSet === 'function') {
+        if (cardService.hasCompletedSet(userId, 3)) {
+          effectiveMax += SET_BONUS_MAX_WATER;
+        }
+      }
+      const { waterCount, nextRecoverTime, maxWaterTime } = wateringTimer.consumeWaterCount(userId, effectiveMax);
 
-      // 3. Increase grow_score
-      const newGrowScore = tree.grow_score + WATERING_GROW_SCORE;
+      // 3. Increase grow_score (with set 1 bonus if completed)
+      let growBonus = WATERING_GROW_SCORE;
+      if (cardService && typeof cardService.hasCompletedSet === 'function') {
+        if (cardService.hasCompletedSet(userId, 1)) {
+          growBonus += SET_BONUS_GROW_SCORE;
+        }
+      }
+      const newGrowScore = tree.grow_score + growBonus;
 
       // 4. Recalculate level
       const newLevel = this.calculateLevel(newGrowScore);
@@ -131,6 +143,7 @@ function createTreeService(options = {}) {
         level: newLevel,
         waterCount,
         nextRecoverTime,
+        maxWaterTime,
       };
 
       if (card) {

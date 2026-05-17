@@ -10,4 +10,8 @@ module.exports = {
   GAIN_CARD_POSSIBILITY: 0.1,
   UPGRADE_NEED_GROW_SCORE: [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500],
   TREE_SPECIES: ['apple', 'cherry', 'oak'],
+  // 卡组套装效果加成
+  SET_BONUS_GROW_SCORE: 5,        // 四季之歌(set 1): 每次浇水额外+5成长值
+  SET_BONUS_HEALTH_REDUCE: 5,     // 森林守护者(set 2): 每天健康扣除减少5
+  SET_BONUS_MAX_WATER: 5,         // 彩虹花园(set 3): 浇水上限+5
 };

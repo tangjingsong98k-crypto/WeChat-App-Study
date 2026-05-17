@@ -38,8 +38,6 @@ Page({
   },
 
   _countdownTimer: null,
-  // 预估恢复满的绝对时间戳
-  _fullRecoverTime: 0,
   _longPressTimer: null,
   _isLongPressing: false,
   _longPressCount: 0,
@@ -51,7 +49,8 @@ Page({
       wx.redirectTo({ url: '/pages/dev-panel/dev-panel' })
       return
     }
-    this.setData({ isDev: app.globalData.isDev })
+    // 清除残留的浮动文本
+    this.setData({ isDev: app.globalData.isDev, waterFloats: [] })
     app.getLoginPromise().then(() => {
       this.loadData()
     })
@@ -94,6 +93,7 @@ Page({
         growPercent: this.calcGrowPercent(tree.grow_score, tree.level),
         healthScore: tree.health_score,
         waterCount: user.water_count,
+        maxWaterCount: user.max_water_time || MAX_WATERING_TIME,
         fertilizeCount: user.fertilize_count,
         loading: false
       })
@@ -114,19 +114,14 @@ Page({
    * 然后启动纯本地倒计时
    */
   _initCountdown(currentCount, lastRecoverTime) {
-    if (currentCount >= MAX_WATERING_TIME) {
+    const maxWater = this.data.maxWaterCount || MAX_WATERING_TIME
+    if (currentCount >= maxWater) {
       this.clearCountdown()
       this.setData({ countdown: '', fullRecoverText: '' })
       return
     }
 
-    // 还需要恢复的次数
-    const remaining = MAX_WATERING_TIME - currentCount
-    // 下一次恢复的时间 = lastRecoverTime + interval
     const nextRecoverTime = lastRecoverTime + WATERING_RESUME_INTERVAL
-    // 恢复满的时间 = nextRecoverTime + (remaining - 1) * interval
-    this._fullRecoverTime = nextRecoverTime + (remaining - 1) * WATERING_RESUME_INTERVAL
-
     this._startLocalCountdown(currentCount, nextRecoverTime)
   },
 
@@ -149,9 +144,10 @@ Page({
 
   _tickCountdown() {
     const now = Date.now()
+    const maxWater = this.data.maxWaterCount || MAX_WATERING_TIME
 
     // 检查是否已经过了恢复时间
-    while (this._nextRecoverTime <= now && this._localWaterCount < MAX_WATERING_TIME) {
+    while (this._nextRecoverTime <= now && this._localWaterCount < maxWater) {
       this._localWaterCount++
       this._nextRecoverTime += WATERING_RESUME_INTERVAL
     }
@@ -162,7 +158,7 @@ Page({
     }
 
     // 如果已满，停止
-    if (this._localWaterCount >= MAX_WATERING_TIME) {
+    if (this._localWaterCount >= maxWater) {
       this.clearCountdown()
       this.setData({ countdown: '', fullRecoverText: '' })
       return
@@ -177,8 +173,9 @@ Page({
       ? `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
       : `${totalSeconds}s`
 
-    // 计算恢复满的剩余时间
-    const fullRemaining = this._fullRecoverTime - now
+    // 计算恢复满的剩余时间（动态计算，基于当前 _localWaterCount 和 _nextRecoverTime）
+    const remainingToFull = maxWater - this._localWaterCount
+    const fullRemaining = (this._nextRecoverTime - now) + (remainingToFull - 1) * WATERING_RESUME_INTERVAL
     const fullRecoverText = this._formatFullRecover(fullRemaining)
 
     this.setData({ countdown, fullRecoverText })
@@ -270,10 +267,12 @@ Page({
   _doWater() {
     if (this.data.waterCount <= 0) return
     const prevLevel = this.data.level
+    const prevGrowScore = this.data.growScore
 
     api.post('/tree/water').then((res) => {
       const newLevel = res.level
       const newGrowScore = res.growScore
+      const actualGain = newGrowScore - prevGrowScore
 
       this.setData({
         growScore: newGrowScore,
@@ -282,7 +281,8 @@ Page({
         growPercent: this.calcGrowPercent(newGrowScore, newLevel)
       })
 
-      this.showWaterFloat(WATERING_GROW_SCORE)
+      // 显示实际增加的成长值
+      this.showWaterFloat(actualGain)
 
       if (res.card) {
         const card = res.card
@@ -295,15 +295,27 @@ Page({
         card._starsCount = starsCount
         this.setData({ cardGained: card })
         setTimeout(() => { this.setData({ cardGained: null }) }, 3000)
+
+        // 获得卡牌后可能集齐套装，静默刷新用户数据以更新加成（如最大浇水次数）
+        api.get('/user/info').then((userData) => {
+          const user = userData.user
+          const newMax = user.max_water_time || MAX_WATERING_TIME
+          if (newMax !== this.data.maxWaterCount) {
+            this.setData({ maxWaterCount: newMax })
+          }
+        }).catch(() => {})
       }
 
-      // 用服务端返回的真实数据重新初始化倒计时
-      if (res.waterCount < MAX_WATERING_TIME) {
-        const nextRecover = res.nextRecoverTime || (Date.now() + WATERING_RESUME_INTERVAL)
+      // 更新倒计时：只在首次启动时用服务端数据，之后不再重置时间基准
+      const effectiveMax = res.maxWaterTime || this.data.maxWaterCount || MAX_WATERING_TIME
+      if (effectiveMax !== this.data.maxWaterCount) {
+        this.setData({ maxWaterCount: effectiveMax })
+      }
+      if (res.waterCount < effectiveMax) {
         this._localWaterCount = res.waterCount
-        this._nextRecoverTime = nextRecover
-        this._fullRecoverTime = nextRecover + (MAX_WATERING_TIME - res.waterCount - 1) * WATERING_RESUME_INTERVAL
         if (!this._countdownTimer) {
+          const nextRecover = res.nextRecoverTime || (Date.now() + WATERING_RESUME_INTERVAL)
+          this._nextRecoverTime = nextRecover
           this._startLocalCountdown(res.waterCount, nextRecover)
         }
       } else {
@@ -326,16 +338,21 @@ Page({
 
   // 测试模式：无限浇水
   onDevWater() {
+    const prevGrowScore = this.data.growScore
     api.post('/test/refill').then(() => {
       return api.post('/tree/water')
     }).then((res) => {
+      const effectiveMax = res.maxWaterTime || this.data.maxWaterCount || MAX_WATERING_TIME
+      const actualGain = res.growScore - prevGrowScore
+      this._localWaterCount = res.waterCount
       this.setData({
         growScore: res.growScore,
         level: res.level,
         waterCount: res.waterCount,
+        maxWaterCount: effectiveMax,
         growPercent: this.calcGrowPercent(res.growScore, res.level)
       })
-      this.showWaterFloat(WATERING_GROW_SCORE)
+      this.showWaterFloat(actualGain)
     }).catch(() => {})
   },
 
