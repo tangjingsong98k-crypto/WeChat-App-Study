@@ -1,0 +1,58 @@
+<!--pages/dev-panel/dev-panel.wxml-->
+<view class="page">
+  <view class="header">
+    <text class="title">🛠 开发控制面板</text>
+    <text class="subtitle">选择或创建测试账号</text>
+  </view>
+
+  <!-- 账号输入区域 -->
+  <view class="input-area">
+    <view class="input-row">
+      <input
+        class="id-input"
+        placeholder="输入账号ID（留空自动生成）"
+        value="{{inputId}}"
+        bindinput="onInputChange"
+      />
+      <button class="history-btn" bindtap="toggleHistory">
+        <text>📋</text>
+      </button>
+    </view>
+    <button class="enter-btn" bindtap="onEnter" loading="{{loading}}" disabled="{{loading}}">
+      进入游戏
+    </button>
+  </view>
+
+  <!-- 历史账号列表 -->
+  <view class="history-panel" wx:if="{{showHistory}}">
+    <view class="history-title">历史账号</view>
+    <view class="history-empty" wx:if="{{accounts.length === 0}}">
+      <text>暂无历史账号</text>
+    </view>
+    <view class="history-list" wx:else>
+      <view
+        class="history-item"
+        wx:for="{{accounts}}"
+        wx:key="openid"
+        bindtap="onSelectAccount"
+        data-openid="{{item.openid}}"
+      >
+        <view class="history-item-main">
+          <text class="history-id">{{item.openid}}</text>
+          <text class="history-species">{{item.species === 'apple' ? '🍎苹果树' : item.species === 'cherry' ? '🌸樱花树' : item.species === 'oak' ? '🌳橡树' : '未选择'}}</text>
+        </view>
+        <view class="history-item-detail">
+          <text class="history-level">Lv.{{item.level}}</text>
+          <text class="history-grow">成长值:{{item.growScore}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷操作提示 -->
+  <view class="tips">
+    <text class="tips-text">💡 留空账号ID将从1000000开始自动生成</text>
+    <text class="tips-text">💡 点击 📋 查看使用过的账号</text>
+    <text class="tips-text">💡 仅在开发环境（localhost）显示此面板</text>
+  </view>
+</view>

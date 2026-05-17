@@ -42,9 +42,10 @@ function createUserService(options = {}) {
       let user = model.findByOpenid(openid);
 
       if (!user) {
-        // First-time login: create new user
+        // First-time login: create new user, nickname defaults to openid (the ID itself)
         user = model.create({
           openid,
+          nickname: openid,
           water_count: MAX_WATERING_TIME,
           last_water_recover_time: now,
           fertilize_count: 0,

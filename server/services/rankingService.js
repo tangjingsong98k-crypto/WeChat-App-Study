@@ -34,7 +34,7 @@ function createRankingService(options = {}) {
 
       return rows.map((row) => ({
         userId: row.user_id,
-        nickname: row.nickname,
+        nickname: row.nickname || '神秘种树人',
         growScore: row.grow_score,
         level: row.level,
         species: row.species,

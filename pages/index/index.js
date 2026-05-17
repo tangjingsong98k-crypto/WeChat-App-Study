@@ -35,6 +35,11 @@ Page({
 
   onShow() {
     const app = getApp()
+    // 开发环境下如果还没登录，跳转到控制面板
+    if (app.globalData.isDev && !app.globalData.isLoggedIn) {
+      wx.redirectTo({ url: '/pages/dev-panel/dev-panel' })
+      return
+    }
     app.getLoginPromise().then(() => {
       this.loadData()
     })

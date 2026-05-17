@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/dev-panel/dev-panel",
     "pages/select-tree/select-tree",
     "pages/cards/cards",
     "pages/ranking/ranking",
