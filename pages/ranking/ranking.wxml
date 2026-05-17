@@ -1,0 +1,49 @@
+<!--pages/ranking/ranking.wxml-->
+<view class="page">
+  <!-- 参与排名开关 -->
+  <view class="participate-bar">
+    <text class="participate-label">参与排名</text>
+    <switch checked="{{participate}}" bindchange="toggleParticipate" color="#4caf50" />
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'all' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="all">
+      <text>总榜</text>
+    </view>
+    <view class="tab-item {{activeTab === 'friends' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="friends">
+      <text>好友榜</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 排行榜列表 -->
+  <block wx:if="{{!loading}}">
+    <view class="empty-tip" wx:if="{{rankings.length === 0}}">
+      <text>暂无参与排名的用户</text>
+    </view>
+
+    <view class="ranking-list" wx:else>
+      <view class="ranking-item" wx:for="{{rankings}}" wx:key="userId">
+        <view class="rank-number rank-{{item.rank <= 3 ? item.rank : 'normal'}}">
+          <text>{{item.rank}}</text>
+        </view>
+        <view class="rank-info">
+          <view class="rank-name">{{item.nickname}}</view>
+          <view class="rank-detail">
+            <text class="rank-species">{{item.speciesIcon}}</text>
+            <text class="rank-level">Lv.{{item.level}}</text>
+          </view>
+        </view>
+        <view class="rank-score">
+          <text class="score-value">{{item.growScore}}</text>
+          <text class="score-label">成长值</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

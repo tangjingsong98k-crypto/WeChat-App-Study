@@ -1,62 +1,268 @@
-/**index.wxss**/
+/* pages/index/index.wxss */
 page {
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-.scrollarea {
-  flex: 1;
-  overflow-y: hidden;
+  background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
 }
 
-.userinfo {
+.page-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #aaa;
-  width: 80%;
-}
-
-.userinfo-avatar {
-  overflow: hidden;
-  width: 128rpx;
-  height: 128rpx;
-  margin: 20rpx;
-  border-radius: 50%;
-}
-
-.usermotto {
-  margin-top: 200px;
-}
-
-.avatar-wrapper {
-  padding: 0;
-  width: 56px !important;
-  border-radius: 8px;
-  margin-top: 40px;
-  margin-bottom: 40px;
-}
-
-.avatar {
-  display: block;
-  width: 56px;
-  height: 56px;
-}
-
-.nickname-wrapper {
-  display: flex;
-  width: 100%;
-  padding: 16px;
+  padding: 40rpx 30rpx;
+  min-height: 100vh;
   box-sizing: border-box;
-  border-top: .5px solid rgba(0, 0, 0, 0.1);
-  border-bottom: .5px solid rgba(0, 0, 0, 0.1);
-  color: black;
 }
 
-.nickname-label {
-  width: 105px;
+/* 树展示区域 */
+.tree-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40rpx;
+  margin-bottom: 60rpx;
 }
 
-.nickname-input {
+.tree-icon {
+  font-size: 160rpx;
+  margin-bottom: 20rpx;
+  animation: treeSway 3s ease-in-out infinite;
+}
+
+@keyframes treeSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+.tree-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tree-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #2e7d32;
+  margin-bottom: 8rpx;
+}
+
+.tree-level {
+  font-size: 28rpx;
+  color: #558b2f;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 4rpx 20rpx;
+  border-radius: 20rpx;
+}
+
+/* 属性进度条区域 */
+.stats-area {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 60rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.stat-item:last-child {
+  margin-bottom: 0;
+}
+
+.stat-label {
+  display: flex;
+  align-items: center;
+  width: 160rpx;
+  font-size: 26rpx;
+  color: #424242;
+}
+
+.stat-icon {
+  margin-right: 8rpx;
+}
+
+.progress-bar {
   flex: 1;
+  height: 20rpx;
+  background: #e0e0e0;
+  border-radius: 10rpx;
+  overflow: hidden;
+  margin: 0 16rpx;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10rpx;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.grow {
+  background: linear-gradient(90deg, #66bb6a, #43a047);
+}
+
+.progress-fill.health {
+  background: linear-gradient(90deg, #ef5350, #e53935);
+}
+
+.stat-value {
+  font-size: 24rpx;
+  color: #757575;
+  width: 120rpx;
+  text-align: right;
+}
+
+/* 操作按钮区域 */
+.action-area {
+  display: flex;
+  justify-content: center;
+  gap: 60rpx;
+  width: 100%;
+}
+
+.action-btn-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.action-btn {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.water-btn {
+  background: linear-gradient(135deg, #42a5f5, #1e88e5);
+  color: #fff;
+}
+
+.fertilize-btn {
+  background: linear-gradient(135deg, #66bb6a, #43a047);
+  color: #fff;
+}
+
+.action-btn.disabled {
+  background: #bdbdbd;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.btn-icon {
+  font-size: 48rpx;
+  margin-bottom: 4rpx;
+}
+
+.btn-text {
+  font-size: 24rpx;
+}
+
+.badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  background: #f44336;
+  color: #fff;
+  font-size: 22rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  text-align: center;
+  border-radius: 18rpx;
+  padding: 0 8rpx;
+}
+
+.countdown {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #f57c00;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 4rpx 16rpx;
+  border-radius: 12rpx;
+}
+
+/* 卡牌获得通知 */
+.card-notification {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.card-notification-content {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 60rpx 50rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.2);
+  animation: cardPopIn 0.3s ease;
+}
+
+@keyframes cardPopIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.card-notification-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff6f00;
+  margin-bottom: 20rpx;
+}
+
+.card-notification-name {
+  font-size: 32rpx;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.card-notification-quality {
+  font-size: 26rpx;
+  color: #757575;
+  margin-bottom: 20rpx;
+}
+
+.card-notification-hint {
+  font-size: 22rpx;
+  color: #bdbdbd;
+}
+
+/* 加载中 */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.loading-text {
+  font-size: 30rpx;
+  color: #757575;
 }

@@ -1,11 +1,39 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/select-tree/select-tree",
+    "pages/cards/cards",
+    "pages/ranking/ranking",
     "pages/logs/logs"
   ],
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#4CAF50",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/tab-home.png",
+        "selectedIconPath": "images/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/cards/cards",
+        "text": "卡牌",
+        "iconPath": "images/tab-cards.png",
+        "selectedIconPath": "images/tab-cards-active.png"
+      },
+      {
+        "pagePath": "pages/ranking/ranking",
+        "text": "排行榜",
+        "iconPath": "images/tab-ranking.png",
+        "selectedIconPath": "images/tab-ranking-active.png"
+      }
+    ]
+  },
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "Weixin",
+    "navigationBarTitleText": "种树游戏",
     "navigationBarBackgroundColor": "#ffffff"
   },
   "style": "v2",
