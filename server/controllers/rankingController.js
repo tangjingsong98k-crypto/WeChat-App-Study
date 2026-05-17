@@ -73,6 +73,29 @@ const rankingController = {
       });
     }
   },
+
+  /**
+   * GET /api/ranking/participation
+   * Get the authenticated user's current participation status.
+   */
+  getParticipation(req, res) {
+    try {
+      const result = rankingService.getUserParticipation(req.user.id);
+
+      return res.json({
+        success: true,
+        data: { participate: result.participate },
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: '获取参与状态失败',
+        },
+      });
+    }
+  },
 };
 
 module.exports = rankingController;

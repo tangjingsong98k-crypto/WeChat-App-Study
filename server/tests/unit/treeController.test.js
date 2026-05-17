@@ -274,12 +274,16 @@ describe('Tree Controller and Routes', () => {
 
     it('should return 400 NO_FERTILIZE_COUNT when count is 0', async () => {
       const token = createUser();
+      // Manually set fertilize_count to 0 for this test
+      const user = db.prepare('SELECT * FROM users WHERE openid = ?').get(token);
+      db.prepare('UPDATE users SET fertilize_count = 0 WHERE id = ?').run(user.id);
+
       await fetchJson(`${baseUrl}/api/tree/select`, {
         method: 'POST',
         headers: { 'x-token': token },
         body: { species: 'cherry' },
       });
-      // User starts with fertilize_count = 0, so trying to fertilize should fail
+      // User now has fertilize_count = 0, so trying to fertilize should fail
       const res = await fetchJson(`${baseUrl}/api/tree/fertilize`, {
         method: 'POST',
         headers: { 'x-token': token },

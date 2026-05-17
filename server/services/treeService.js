@@ -104,7 +104,7 @@ function createTreeService(options = {}) {
       }
 
       // 2. Consume one watering count (throws NO_WATER_COUNT if 0)
-      const { waterCount } = wateringTimer.consumeWaterCount(userId);
+      const { waterCount, nextRecoverTime } = wateringTimer.consumeWaterCount(userId);
 
       // 3. Increase grow_score
       const newGrowScore = tree.grow_score + WATERING_GROW_SCORE;
@@ -129,6 +129,7 @@ function createTreeService(options = {}) {
         growScore: newGrowScore,
         level: newLevel,
         waterCount,
+        nextRecoverTime,
       };
 
       if (card) {

@@ -18,8 +18,18 @@ Page({
   onShow() {
     const app = getApp()
     app.getLoginPromise().then(() => {
+      this.loadParticipation()
       this.loadRanking()
     })
+  },
+
+  // 加载当前用户的参与状态
+  loadParticipation() {
+    api.get('/ranking/participation')
+      .then((data) => {
+        this.setData({ participate: data.participate === 1 })
+      })
+      .catch(() => {})
   },
 
   switchTab(e) {

@@ -52,9 +52,9 @@
         <text class="btn-icon">💧</text>
         <text class="btn-text">浇水</text>
       </button>
-      <view class="badge" wx:if="{{waterCount > 0}}">{{waterCount}}</view>
-      <view class="countdown" wx:if="{{waterCount <= 0 && countdown}}">
-        <text>{{countdown}}</text>
+      <view class="count-display">{{waterCount}}/{{maxWaterCount}}</view>
+      <view class="countdown" wx:if="{{countdown}}">
+        <text>⏱ {{countdown}}</text>
       </view>
     </view>
 
@@ -67,8 +67,14 @@
         <text class="btn-icon">🌿</text>
         <text class="btn-text">施肥</text>
       </button>
-      <view class="badge" wx:if="{{fertilizeCount > 0}}">{{fertilizeCount}}</view>
+      <view class="count-display">{{fertilizeCount}}</view>
     </view>
+  </view>
+
+  <!-- 开发模式：无限浇水/施肥按钮 -->
+  <view class="dev-actions" wx:if="{{isDev}}">
+    <button class="dev-btn" bindtap="onDevWater">🔧 无限浇水</button>
+    <button class="dev-btn" bindtap="onDevFertilize">🔧 无限施肥</button>
   </view>
 
   <!-- 升级弹窗 -->

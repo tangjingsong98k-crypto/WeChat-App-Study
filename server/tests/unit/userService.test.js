@@ -23,7 +23,7 @@ describe('userService', () => {
       expect(result.userData).toBeDefined();
       expect(result.userData.openid).toBe('new-user-code');
       expect(result.userData.water_count).toBe(50); // MAX_WATERING_TIME
-      expect(result.userData.fertilize_count).toBe(0);
+      expect(result.userData.fertilize_count).toBe(1); // MAX_FERTILIZE_COUNT
       expect(result.userData.tree).toBeNull();
     });
 
@@ -32,7 +32,7 @@ describe('userService', () => {
 
       const user = result.userData;
       expect(user.water_count).toBe(50);
-      expect(user.fertilize_count).toBe(0);
+      expect(user.fertilize_count).toBe(1); // MAX_FERTILIZE_COUNT
       expect(user.last_water_recover_time).toBeGreaterThan(0);
       expect(user.created_at).toBeGreaterThan(0);
       expect(user.last_login_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);

@@ -191,13 +191,41 @@ page {
   padding: 0 8rpx;
 }
 
-.countdown {
+.count-display {
   margin-top: 12rpx;
   font-size: 24rpx;
+  color: #555;
+  font-weight: bold;
+}
+
+.countdown {
+  margin-top: 8rpx;
+  font-size: 22rpx;
   color: #f57c00;
   background: rgba(255, 255, 255, 0.8);
   padding: 4rpx 16rpx;
   border-radius: 12rpx;
+}
+
+/* ========== 开发模式按钮 ========== */
+.dev-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 40rpx;
+}
+
+.dev-btn {
+  font-size: 22rpx;
+  padding: 10rpx 24rpx;
+  background: rgba(255, 152, 0, 0.15);
+  color: #e65100;
+  border: 2rpx solid #ff9800;
+  border-radius: 20rpx;
+  line-height: normal;
+}
+
+.dev-btn::after {
+  border: none;
 }
 
 /* ========== 浇水飘字动画 ========== */

@@ -1,5 +1,7 @@
 const userModel = require('../models/userModel');
 const { createUserModel } = require('../models/userModel');
+const defaultWateringTimerService = require('./wateringTimerService');
+const { createWateringTimerService } = require('./wateringTimerService');
 const {
   MAX_WATERING_TIME,
   DAILY_FERTILIZE_RESUME_TIMES,
@@ -13,10 +15,12 @@ const { getDb } = require('../db/init');
  * @param {object} [options] - Optional configuration
  * @param {function} [options.getDatabase] - Custom database getter (for testing)
  * @param {object} [options.userModel] - Custom user model instance (for testing)
+ * @param {object} [options.wateringTimerService] - Custom watering timer service (for testing)
  */
 function createUserService(options = {}) {
   const getDatabase = options.getDatabase || getDb;
   const model = options.userModel || (options.getDatabase ? createUserModel({ getDatabase: options.getDatabase }) : userModel);
+  const wateringTimer = options.wateringTimerService || (options.getDatabase ? createWateringTimerService({ getDatabase: options.getDatabase }) : defaultWateringTimerService);
 
   return {
     /**
@@ -48,7 +52,7 @@ function createUserService(options = {}) {
           nickname: openid,
           water_count: MAX_WATERING_TIME,
           last_water_recover_time: now,
-          fertilize_count: 0,
+          fertilize_count: MAX_FERTILIZE_COUNT,
           last_login_date: today,
           created_at: now,
         });
@@ -74,6 +78,7 @@ function createUserService(options = {}) {
 
     /**
      * Get user info with tree data.
+     * Applies lazy watering count calculation to return accurate current values.
      * @param {number} userId
      * @returns {object|null} user info with tree, or null if not found
      */
@@ -81,11 +86,16 @@ function createUserService(options = {}) {
       const user = model.findById(userId);
       if (!user) return null;
 
+      // Apply lazy calculation to get actual current water count
+      const { currentCount, newRecoverTime } = wateringTimer.calculateAvailableWaterCount(user);
+
       const db = getDatabase();
       const tree = db.prepare('SELECT * FROM trees WHERE user_id = ?').get(user.id);
 
       return {
         ...user,
+        water_count: currentCount,
+        last_water_recover_time: newRecoverTime,
         tree: tree || null,
       };
     },

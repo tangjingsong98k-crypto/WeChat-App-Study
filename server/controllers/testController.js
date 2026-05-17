@@ -114,6 +114,40 @@ function createTestController(options = {}) {
         });
       }
     },
+
+    /**
+     * POST /api/test/refill
+     * Refill a user's water and fertilize counts to max (for dev testing).
+     * Requires x-token header.
+     */
+    refill(req, res) {
+      try {
+        const token = req.headers['x-token'] || req.headers['authorization'];
+        if (!token) {
+          return res.status(401).json({ success: false, error: { code: 'AUTH_REQUIRED', message: '需要token' } });
+        }
+
+        const db = getDatabase();
+        const user = db.prepare('SELECT * FROM users WHERE openid = ?').get(token);
+        if (!user) {
+          return res.status(404).json({ success: false, error: { code: 'USER_NOT_FOUND', message: '用户不存在' } });
+        }
+
+        const { MAX_FERTILIZE_COUNT } = require('../config');
+        db.prepare('UPDATE users SET water_count = ?, fertilize_count = ?, last_water_recover_time = ? WHERE id = ?')
+          .run(MAX_WATERING_TIME, MAX_FERTILIZE_COUNT, Date.now(), user.id);
+
+        return res.json({
+          success: true,
+          data: { waterCount: MAX_WATERING_TIME, fertilizeCount: MAX_FERTILIZE_COUNT },
+        });
+      } catch (err) {
+        return res.status(500).json({
+          success: false,
+          error: { code: 'INTERNAL_ERROR', message: '补充失败' },
+        });
+      }
+    },
   };
 }
 
