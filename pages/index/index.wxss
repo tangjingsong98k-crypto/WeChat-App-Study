@@ -200,7 +200,131 @@ page {
   border-radius: 12rpx;
 }
 
-/* 卡牌获得通知 */
+/* ========== 浇水飘字动画 ========== */
+.water-float {
+  position: absolute;
+  top: -20rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: floatUp 1s ease-out forwards;
+  z-index: 10;
+}
+
+.water-float-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1e88e5;
+  white-space: nowrap;
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-120rpx);
+  }
+}
+
+/* ========== 升级弹窗 ========== */
+.level-up-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.level-up-dialog {
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 60rpx 50rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.2);
+  animation: levelUpPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  min-width: 500rpx;
+}
+
+@keyframes levelUpPop {
+  0% { transform: scale(0.3); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.level-up-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #ff6f00;
+  margin-bottom: 30rpx;
+}
+
+.level-up-levels {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.level-up-prev {
+  font-size: 36rpx;
+  color: #999;
+  font-weight: bold;
+}
+
+.level-up-arrow {
+  font-size: 36rpx;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.level-up-cur {
+  font-size: 44rpx;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.level-up-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 36rpx;
+}
+
+.level-up-detail-item {
+  font-size: 28rpx;
+  color: #555;
+}
+
+.level-up-hint {
+  color: #999;
+  font-style: italic;
+}
+
+.level-up-btn {
+  background: linear-gradient(135deg, #66bb6a, #43a047);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: bold;
+  border: none;
+  border-radius: 40rpx;
+  padding: 16rpx 60rpx;
+}
+
+.level-up-btn::after {
+  border: none;
+}
+
+/* ========== 卡牌获得通知 ========== */
 .card-notification {
   position: fixed;
   top: 0;

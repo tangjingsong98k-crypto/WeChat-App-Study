@@ -17,7 +17,7 @@
         <text>成长值</text>
       </view>
       <view class="progress-bar">
-        <view class="progress-fill grow" style="width: {{growScore > 0 ? (growScore / 5500 * 100 > 100 ? 100 : growScore / 5500 * 100) : 0}}%"></view>
+        <view class="progress-fill grow" style="width: {{growPercent}}%"></view>
       </view>
       <text class="stat-value">{{growScore}}</text>
     </view>
@@ -37,10 +37,17 @@
   <!-- 操作按钮区域 -->
   <view class="action-area">
     <view class="action-btn-wrapper">
+      <!-- 浇水飘字动画 -->
+      <view class="water-float" wx:for="{{waterFloats}}" wx:key="id">
+        <text class="water-float-text">{{item.text}}</text>
+      </view>
+
       <button
         class="action-btn water-btn {{waterCount <= 0 ? 'disabled' : ''}}"
         disabled="{{waterCount <= 0}}"
         bindtap="onWater"
+        bindlongpress="onWaterLongPressStart"
+        bindtouchend="onWaterLongPressEnd"
       >
         <text class="btn-icon">💧</text>
         <text class="btn-text">浇水</text>
@@ -61,6 +68,27 @@
         <text class="btn-text">施肥</text>
       </button>
       <view class="badge" wx:if="{{fertilizeCount > 0}}">{{fertilizeCount}}</view>
+    </view>
+  </view>
+
+  <!-- 升级弹窗 -->
+  <view class="level-up-overlay" wx:if="{{showLevelUp}}" bindtap="onDismissLevelUp">
+    <view class="level-up-dialog" catchtap="">
+      <text class="level-up-title">🎉 升级成功！</text>
+      <view class="level-up-levels">
+        <text class="level-up-prev">Lv.{{levelUpInfo.prevLevel}}</text>
+        <text class="level-up-arrow">→</text>
+        <text class="level-up-cur">Lv.{{levelUpInfo.curLevel}}</text>
+      </view>
+      <view class="level-up-details">
+        <text class="level-up-detail-item">成长值：{{levelUpInfo.growScore}}</text>
+        <block wx:if="{{levelUpInfo.participating}}">
+          <text class="level-up-detail-item">好友排名：第{{levelUpInfo.friendsRank}}名</text>
+          <text class="level-up-detail-item">总排名：第{{levelUpInfo.allRank}}名</text>
+        </block>
+        <text class="level-up-detail-item level-up-hint" wx:else>参与排行，比比谁高！</text>
+      </view>
+      <button class="level-up-btn" bindtap="onDismissLevelUp">太棒了！</button>
     </view>
   </view>
 
