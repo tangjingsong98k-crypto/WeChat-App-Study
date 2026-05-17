@@ -1,8 +1,12 @@
 // app.js
 const api = require('./services/api')
 
-// 开发环境检测：本地调试或 BASE_URL 指向 localhost
-const IS_DEV = api.BASE_URL.indexOf('localhost') !== -1 || api.BASE_URL.indexOf('127.0.0.1') !== -1
+// 开发环境检测：本地调试或 BASE_URL 指向 localhost / 局域网 IP
+const IS_DEV = api.BASE_URL.indexOf('localhost') !== -1
+  || api.BASE_URL.indexOf('127.0.0.1') !== -1
+  || api.BASE_URL.indexOf('192.168.') !== -1
+  || api.BASE_URL.indexOf('10.') !== -1
+  || api.BASE_URL.indexOf('172.') !== -1
 
 App({
   onLaunch() {

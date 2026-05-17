@@ -4,7 +4,10 @@
  * 以及 Token 过期自动重新登录逻辑
  */
 
-const BASE_URL = 'http://localhost:3000/api'
+// 局域网模式：将此处改为你电脑的局域网 IP（手机和电脑需连同一 WiFi）
+// 模拟器调试用 localhost，真机调试用局域网 IP
+const LAN_IP = '10.129.251.52' // ← 改成你电脑的实际局域网 IP
+const BASE_URL = `http://${LAN_IP}:3000/api`
 
 /**
  * 执行微信登录流程：wx.login → POST /api/user/login → 存储 token
