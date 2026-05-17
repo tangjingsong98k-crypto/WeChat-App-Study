@@ -77,10 +77,13 @@
   </view>
 
   <!-- 开发模式调试按钮 -->
-  <view class="dev-actions" wx:if="{{isDev}}">
-    <button class="dev-btn" bindtap="onDevWater">🔧无限浇水</button>
-    <button class="dev-btn" bindtap="onDevFertilize">🔧无限施肥</button>
-    <button class="dev-btn" bindtap="onDevSettle">🔧触发结算</button>
+  <view class="dev-panel" wx:if="{{isDev}}">
+    <view class="dev-panel-title">🛠 开发调试</view>
+    <view class="dev-actions">
+      <button class="dev-btn" bindtap="onDevWater">💧无限浇水</button>
+      <button class="dev-btn" bindtap="onDevFertilize">🌿无限施肥</button>
+      <button class="dev-btn" bindtap="onDevSettle">🌙触发结算</button>
+    </view>
   </view>
 
   <!-- 升级弹窗 -->

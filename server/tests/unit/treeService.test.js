@@ -115,9 +115,12 @@ describe('treeService', () => {
       expect(treeService.calculateLevel(300)).toBe(2);
     });
 
-    it('should return max level for very high grow score', () => {
+    it('should return higher levels for grow score beyond array', () => {
       expect(treeService.calculateLevel(5500)).toBe(10);
-      expect(treeService.calculateLevel(9999)).toBe(10);
+      // Beyond array: last interval is 1000, so 6500 = level 11, 7500 = level 12
+      expect(treeService.calculateLevel(6500)).toBe(11);
+      expect(treeService.calculateLevel(7500)).toBe(12);
+      expect(treeService.calculateLevel(9999)).toBe(14);
     });
 
     it('should handle boundary values correctly', () => {

@@ -62,20 +62,32 @@ function createTreeService(options = {}) {
     /**
      * Calculate the tree level based on grow score.
      *
-     * Finds the maximum level where UPGRADE_NEED_GROW_SCORE[level] <= growScore.
+     * For levels within UPGRADE_NEED_GROW_SCORE array, finds the maximum level
+     * where UPGRADE_NEED_GROW_SCORE[level] <= growScore.
+     * Beyond the array, uses a fixed increment equal to the last interval.
      *
      * @param {number} growScore - the current grow score
      * @returns {number} the calculated level
      */
     calculateLevel(growScore) {
-      let level = 0;
-      for (let i = UPGRADE_NEED_GROW_SCORE.length - 1; i >= 0; i--) {
-        if (growScore >= UPGRADE_NEED_GROW_SCORE[i]) {
-          level = i;
-          break;
+      const maxIdx = UPGRADE_NEED_GROW_SCORE.length - 1;
+
+      // If within the defined array range
+      if (growScore < UPGRADE_NEED_GROW_SCORE[maxIdx]) {
+        let level = 0;
+        for (let i = maxIdx; i >= 0; i--) {
+          if (growScore >= UPGRADE_NEED_GROW_SCORE[i]) {
+            level = i;
+            break;
+          }
         }
+        return level;
       }
-      return level;
+
+      // Beyond the array: use fixed increment per level
+      const lastInterval = UPGRADE_NEED_GROW_SCORE[maxIdx] - UPGRADE_NEED_GROW_SCORE[maxIdx - 1];
+      const excess = growScore - UPGRADE_NEED_GROW_SCORE[maxIdx];
+      return maxIdx + Math.floor(excess / lastInterval);
     },
 
     /**

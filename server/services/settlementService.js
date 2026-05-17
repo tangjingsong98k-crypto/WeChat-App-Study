@@ -1,5 +1,6 @@
 const { getDb } = require('../db/init');
 const { createTreeModel } = require('../models/treeModel');
+const { createUserModel } = require('../models/userModel');
 const defaultTreeService = require('./treeService');
 const { createTreeService } = require('./treeService');
 const defaultCardService = require('./cardService');
@@ -9,6 +10,8 @@ const {
   LOW_HEALTH_SCORE,
   UPGRADE_NEED_GROW_SCORE,
   SET_BONUS_HEALTH_REDUCE,
+  DAILY_FERTILIZE_RESUME_TIMES,
+  MAX_FERTILIZE_COUNT,
 } = require('../config');
 
 /**
@@ -17,12 +20,14 @@ const {
  * @param {object} [options] - Optional configuration
  * @param {function} [options.getDatabase] - Custom database getter (for testing)
  * @param {object} [options.treeModel] - Custom tree model instance (for testing)
+ * @param {object} [options.userModel] - Custom user model instance (for testing)
  * @param {object} [options.treeService] - Custom tree service instance (for testing)
  * @param {object} [options.cardService] - Custom card service instance (for testing)
  */
 function createSettlementService(options = {}) {
   const getDatabase = options.getDatabase || getDb;
   const model = options.treeModel || createTreeModel({ getDatabase });
+  const userMdl = options.userModel || createUserModel({ getDatabase });
   const treeSvc = options.treeService || createTreeService({ getDatabase });
   const cardSvc = options.cardService !== undefined ? options.cardService : (options.getDatabase ? createCardService({ getDatabase }) : defaultCardService);
 
@@ -130,6 +135,16 @@ function createSettlementService(options = {}) {
           grow_score: newGrowScore,
           level: newLevel,
         });
+
+        // Step 7: Restore fertilize count
+        const user = userMdl.findById(userId);
+        if (user) {
+          const newFertilizeCount = Math.min(
+            user.fertilize_count + DAILY_FERTILIZE_RESUME_TIMES,
+            MAX_FERTILIZE_COUNT
+          );
+          userMdl.update(userId, { fertilize_count: newFertilizeCount });
+        }
 
         return {
           healthScore: newHealthScore,

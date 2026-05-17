@@ -59,12 +59,15 @@ Page({
           }
         })
 
-        // 排序：先按卡组ID排序（1,2,3,-1），再按稀有度从低到高
+        // 排序：已拥有优先，然后稀有度从高到低，然后按卡组号排列
         processedCards.sort((a, b) => {
+          // 1. 已拥有的排前面
+          if (a.owned !== b.owned) return a.owned ? -1 : 1
+          // 2. 稀有度高的排前面
+          if (a.qualityOrder !== b.qualityOrder) return b.qualityOrder - a.qualityOrder
+          // 3. 按卡组号排列
           const setOrder = (id) => id === -1 ? 99 : id
-          const setDiff = setOrder(a.card_set_id) - setOrder(b.card_set_id)
-          if (setDiff !== 0) return setDiff
-          return a.qualityOrder - b.qualityOrder
+          return setOrder(a.card_set_id) - setOrder(b.card_set_id)
         })
 
         // 计算每个套装的收集进度
