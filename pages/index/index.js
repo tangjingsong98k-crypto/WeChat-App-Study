@@ -19,6 +19,7 @@ Page({
     maxWaterCount: MAX_WATERING_TIME,
     fertilizeCount: 0,
     countdown: '',
+    fullRecoverText: '',
     cardGained: null,
     loading: true,
     waterFloats: [],
@@ -106,7 +107,7 @@ Page({
   _initCountdown(currentCount, lastRecoverTime) {
     if (currentCount >= MAX_WATERING_TIME) {
       this.clearCountdown()
-      this.setData({ countdown: '' })
+      this.setData({ countdown: '', fullRecoverText: '' })
       return
     }
 
@@ -154,7 +155,7 @@ Page({
     // 如果已满，停止
     if (this._localWaterCount >= MAX_WATERING_TIME) {
       this.clearCountdown()
-      this.setData({ countdown: '' })
+      this.setData({ countdown: '', fullRecoverText: '' })
       return
     }
 
@@ -166,7 +167,26 @@ Page({
     const countdown = minutes > 0
       ? `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
       : `${totalSeconds}s`
-    this.setData({ countdown })
+
+    // 计算恢复满的剩余时间
+    const fullRemaining = this._fullRecoverTime - now
+    const fullRecoverText = this._formatFullRecover(fullRemaining)
+
+    this.setData({ countdown, fullRecoverText })
+  },
+
+  _formatFullRecover(ms) {
+    if (ms <= 0) return ''
+    const totalSeconds = Math.ceil(ms / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    if (hours > 0) {
+      return `${hours}时${minutes}分后水壶装满`
+    }
+    if (minutes > 0) {
+      return `${minutes}分${totalSeconds % 60}秒后水壶装满`
+    }
+    return `${totalSeconds}秒后水壶装满`
   },
 
   clearCountdown() {
@@ -271,7 +291,7 @@ Page({
         }
       } else {
         this.clearCountdown()
-        this.setData({ countdown: '' })
+        this.setData({ countdown: '', fullRecoverText: '' })
       }
 
       if (res.waterCount === 0) {

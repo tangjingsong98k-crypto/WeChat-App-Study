@@ -71,6 +71,11 @@
     </view>
   </view>
 
+  <!-- 恢复满预估时间 -->
+  <view class="full-recover-info" wx:if="{{fullRecoverText}}">
+    <text class="full-recover-text">💧 {{fullRecoverText}}</text>
+  </view>
+
   <!-- 开发模式：无限浇水/施肥按钮 -->
   <view class="dev-actions" wx:if="{{isDev}}">
     <button class="dev-btn" bindtap="onDevWater">🔧 无限浇水</button>

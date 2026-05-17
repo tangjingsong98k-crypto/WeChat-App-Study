@@ -198,6 +198,16 @@ page {
   font-weight: bold;
 }
 
+.full-recover-info {
+  margin-top: 24rpx;
+  text-align: center;
+}
+
+.full-recover-text {
+  font-size: 24rpx;
+  color: #78909c;
+}
+
 .countdown {
   margin-top: 8rpx;
   font-size: 22rpx;
