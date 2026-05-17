@@ -112,6 +112,7 @@
     <view class="card-notification-content">
       <text class="card-notification-title">🎉 获得卡牌！</text>
       <view class="game-card-preview" style="background: {{cardGained._setBg}}; border-color: {{cardGained._setHue}};">
+        <view class="card-new-badge" wx:if="{{cardGained.isFirstGain}}">New</view>
         <view class="game-card-preview-set" style="background: {{cardGained._setBg}}; border-color: {{cardGained._setHue}};">
           <text style="color: {{cardGained._setHue}};">{{cardGained._setName}}</text>
         </view>
@@ -129,6 +130,7 @@
       <scroll-view class="cards-gained-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
         <view class="cards-gained-row">
           <view class="game-card-preview game-card-preview-small" wx:for="{{cardsGained}}" wx:key="id" style="background: {{item._setBg}}; border-color: {{item._setHue}};">
+            <view class="card-new-badge card-new-badge-small" wx:if="{{item.isFirstGain}}">New</view>
             <view class="game-card-preview-set" style="background: {{item._setBg}}; border-color: {{item._setHue}};">
               <text style="color: {{item._setHue}};">{{item._setName}}</text>
             </view>

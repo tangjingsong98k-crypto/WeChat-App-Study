@@ -564,6 +564,28 @@ page {
 .game-card-preview-stars.stars-3 { color: #ab47bc; }
 .game-card-preview-stars.stars-5 { color: #ffa000; }
 
+/* ========== 新卡牌 New 标签 ========== */
+.card-new-badge {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  background: #f44336;
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: bold;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  z-index: 10;
+  line-height: 1.2;
+}
+
+.card-new-badge-small {
+  top: 6rpx;
+  right: 6rpx;
+  font-size: 16rpx;
+  padding: 2rpx 8rpx;
+}
+
 /* 加载中 */
 .loading-container {
   display: flex;
