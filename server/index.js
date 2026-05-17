@@ -28,9 +28,19 @@ app.get('/api/health', (req, res) => {
 // Start server
 if (require.main === module) {
   const { registerDailySettlementJob } = require('./jobs/dailySettlement');
+  const os = require('os');
 
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
+    // 打印局域网 IP，方便真机调试时配置
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+      for (const iface of interfaces[name]) {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          console.log(`局域网地址: http://${iface.address}:${PORT}`);
+        }
+      }
+    }
   });
 
   // Register cron jobs
